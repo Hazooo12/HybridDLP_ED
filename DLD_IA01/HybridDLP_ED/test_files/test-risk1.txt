@@ -1,0 +1,28 @@
+INCOME STATEMENT						
+		YEAR 1	YEAR 2	YEAR 3	YEAR 4	YEAR 5
+Sales (Total revenues)		10,399,950,000	10,919,947,500	12,011,942,250	18,629,494,743	20,918,318,954
+Less: Sales Discount (5%), sale return (2%)		727,996,500	764,396,325	840,835,958	1,304,064,632	1,464,282,327
+						
+Net sales		9,671,953,500	10,155,551,175	11,171,106,293	17,325,430,111	19,454,036,627
+Less : Cost of goods sold ( COGS)		5,859,857,000	6,152,849,850	6,768,134,835	10,352,952,364	11,905,895,218
+Gross profit from sales		3,812,096,500	4,002,701,325	4,402,971,458	6,972,477,747	7,548,141,409
+Operating Expenses		4,328,296,728	4,640,586,564	5,016,809,221	5,453,317,902	5,953,497,104
+Less: Selling, general and administrative (SG&A)		4,328,296,728	4,640,586,564	5,016,809,221	5,453,317,902	5,953,497,104
+						
+"Earnings before interest, taxes and 
+depreciation & amortization 
+(EBITDA) "		-516,200,228	-637,885,239	-613,837,763	1,519,159,845	1,594,644,305
+Depreciation & Amortization		226,840,000	226,840,000	226,840,000	226,840,000	226,840,000
+"Earnings before interest, taxes 
+(EBIT) "		-743,040,228	-864,725,239	-840,677,763	1,292,319,845	1,367,804,305
+Less: Interest		0	0	0	0	0
+"Less: Income Taxes expenses (income 
+taxes rate 20%) "		-148,608,046	-172,945,048	-168,135,553	258,463,969	273,560,861
+"NET INCOME (Earning after 
+taxes (EAT)) "		-594,432,182	-691,780,192	-672,542,211	1,033,855,876	1,094,243,444
+						
+Gross profit margin % = Gross profit from sales / Net sales		39%	39%	39%	40%	39%
+Net profit margin % = EAT / Net sales		-6%	-7%	-6%	6%	6%
+						
+						
+Ô CẦN ĐIỀN LÀ Ô MÀU ĐỎ 			-> ĐIỀN VÀO LÀ SỐ TỰ NHẢY NHÉ :D			

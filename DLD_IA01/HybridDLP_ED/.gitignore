@@ -1,0 +1,128 @@
+# Test Files - Exclude all test-related files
+# Test Scripts
+scripts/test_*.py
+scripts/*test*.py
+scripts/run_tests.py
+scripts/verify_system.py
+scripts/check_db.py
+scripts/quick_test.*
+scripts/test_with_docker.py
+scripts/test_worker.py
+scripts/test_file_event.py
+
+
+# Test folders
+worker/tests/
+**/tests/
+
+# Test Documentation (Markdown files related to testing)
+*TEST*.md
+TEST_*.md
+*_TEST*.md
+TEST*.md
+*test*.md
+test_*.md
+
+# Test Results and Reports
+TEST_RESULTS.md
+TEST_REPORT.md
+TEST_STATUS.md
+TEST_SUMMARY.md
+TEST_COMPLETE.md
+TEST_COMPLETE_SUMMARY.md
+TEST_FINAL.md
+TEST_FINAL_RESULTS.md
+TEST_SUCCESS.md
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+*.log.*
+agent/runtime/logs/
+runtime/logs/
+dashboard/logs/
+worker/logs/
+
+# Database files (runtime)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+agent/runtime/*.db
+agent/runtime/*.db-journal
+agent/runtime/events.jsonl
+runtime/*.db
+runtime/*.db-journal
+runtime/events.jsonl
+
+# Runtime state files
+agent/runtime/state/
+runtime/state/
+agent/runtime/watch_test/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Docker volumes (if any)
+docker-data/
+
+# ML Models (large files, should be trained separately)
+# Note: Allowing .pkl files to be committed for UEBA model
+# worker/ml_models/*.pkl  # Commented out to allow committing trained models
+worker/ml_models/*.joblib
+worker/ml_models/*.h5
+worker/ml_models/*.onnx
+
+# Dataset files (large)
+worker/dataset/*
+!worker/dataset/.gitkeep
+
+# Keep source code structure
+!worker/
+!agent/
+!dashboard/
+!docker-compose.yml
+!docker-compose.dev.yml
+!*.dockerfile
+!Dockerfile
+!requirements.txt
+!README.md
+!SETUP_GUIDE.md
+!NEXT_STEPS.md
+!QUICK_START.md
+!Makefile
+!docs/
+!scripts/setup_ml_models.*
+!scripts/docker-*.sh

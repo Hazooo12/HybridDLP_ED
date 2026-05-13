@@ -1,0 +1,2 @@
+# This file ensures the ml_models directory is tracked by git
+# Trained models (.pkl files) can be committed to this directory

@@ -1,0 +1,18 @@
+HybridDLP_ED/Dataset/email.csv/email.csv
+HybridDLP_ED/Dataset/file.csv/file.csv
+HybridDLP_ED/Dataset/http.csv/http.csv
+HybridDLP_ED/Dataset/email.csv
+HybridDLP_ED/Dataset/file.csv
+HybridDLP_ED/Dataset/http.csv
+# runtime files
+HybridDLP_ED/agent/runtime/
+*.db
+*.jsonl
+*.pid
+*.log
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/

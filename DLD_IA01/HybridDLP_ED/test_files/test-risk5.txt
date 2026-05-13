@@ -1,0 +1,76 @@
+Fixed cost										
+Cost Item	Year 1 (2026)	Year 2 (2027) 	Year 3 (2028) 	Year 4 (2029) 	Year 5 (2030)	TOTAL				
+Warehouse rent	600,000,000	600,000,000	600,000,000	600,000,000	600,000,000	3,000,000,000				
+Staff salaries and insurance  	2,485,860,000	2,734,446,000	3,007,890,600	3,308,679,660	3,639,547,626	15,176,423,886				
+Equipment depreciation	211,140,000	211,140,000	211,140,000	211,140,000	211,140,000	1,055,700,000				
+wifi fee 	9,600,000	9,600,000	9,600,000	9,600,000	9,600,000	48,000,000				
+Website & system	12,000,000	12,000,000	12,000,000	12,000,000	12,000,000	60,000,000				
+Maintenance	39,920,000	39,920,000	39,920,000	39,920,000	39,920,000	199,600,000				
+Office equipment depreciation	5,700,000	5,700,000	5,700,000	5,700,000	5,700,000	28,500,000				
+TOTAL	3,364,220,000	3,612,806,000	3,886,250,600	4,187,039,660	4,517,907,626	19,568,223,886				
+							207155000	2485860000		
+Variable Costs							12			
+Cost Item	Year 1	Year 2	Year 3	Year 4	Year 5					
+Raw materials	3,188,117,000	3,347,522,850	3,682,275,135	4,868,810,903	5,599,132,538		252949331.3			
+Purchased Components	2,463,165,000	2,586,323,250	2,844,955,575	5,136,079,800	5,906,491,770					
+marketing and sales promotion	310,000,000	341,000,000	375,100,000	412,610,000	453,871,000					
+Packaging 	208,575,000	219,003,750	240,904,125	348,061,661	400,270,910					
+Transportation fee	384,000,000	403,200,000	443,520,000	501,177,600	576,354,240					
+Utilities (water, electric) 	270,076,728	283,580,564	311,938,621	352,490,642	405,364,238					
+Total variable cost	6,823,933,728	7,180,630,414	7,898,693,456	11,619,230,605	13,341,484,696					
+		105%	110%	113%	115%					
+				3,214,799,800						
+				4,160,970,903						
+				272,221,661						
+				2,987,203,354						
+										
+RAW MATERIAL COST										
+No	Product	Components	Cost per unit (VND)	Quantity (m)	TOTAL					
+1	Life Jacket	TPU Laminated Fabric	30,000	0.8	24000	52,000	38,591	2,006,732,000		
+		TPU Film Inflatable Bladder	26,000	0.5	13000					
+		Oral inflation tube	10,000	1	10000					
+		whistle for life jacket	5,000	1	5000					
+2	Bag	TPU Coated Fabric	90,000	1.5	135000	140,000	7,125	997,500,000		8,935
+		Accessories	5,000	1	5000					
+										
+3	Thermal emergency blanket	PET Coating	5,000	2	10000	15,000	12,259	183,885,000		5,056
+		Accessories	5,000	1	5000					
+								3,188,117,000		
+										
+COMPONENT COST of FLRK									MATERIAL	
+No	Product 	Quantity 	Cost	Total 						
+1	Bag	1	140,000	140,000		0				
+2	Life jackets	4	52,000	208,000		0				
+3	-Emergency flashlights (Headlamp)	1	90,000	90,000	7,125	641,250,000				
+4	Portable Charge	1	400,000	400,000	7,125	2,850,000,000				
+5	First-aid kits, medical consumables (bandages, gauze, gloves, masks)	1	20,000	20,000	7,125	142,500,000				
+6	Heat pads	10	7,000	70,000	7,125	498,750,000				
+7	Hardtack	1	50,000	50,000	7,125	356,250,000				
+8	Waterproof pouches	1	5,000	5,000	7,125	35,625,000				
+9	Thermal emergency blanket	1	15,000	15,000						
+	Total			998,000						
+										
+COMPONENT COST of FRRK										
+	Product 	Quantity 	Cost	Total 						
+1	Bag	1	140,000	140,000						
+2	Smoke escape masks	1	130,000	130,000	5,056	657,280,000				
+3	Fire blanket	1	80,000	80,000	5,056	404,480,000	1,061,760,000			
+4	Integrated escape tool	1	80,000	80,000	5,056	404,480,000				
+5	-Emergency flashlights (Headlamp)	1	90,000	90,000	5,056	455,040,000	1,921,280,000			
+	TOTAL 			520,000						
+										
+PACKAGING COST										
+NO	Product Line	Net Weight (kg)	Quantity 	Cost	Total (VND)		hỏa 			
+1	Bag	3	7,125	15,000	106,875,000		75,840,000			
+2	Life Jacket	0.5	38,591	2,000	77,182,000					
+3	Thermal emergency blanket	0	12,259	2,000	24,518,000					
+TOTAL 			57,975		208,575,000					
+										
+										
+										
+										
+COST OF GOOD SOLD										
+	Year 1	Year 2	Year 3	Year 4	Year 5					
+Material Cost	5,651,282,000	5,933,846,100	6,527,230,710	10,004,890,702	11,505,624,308					
+Packaging Cost	208,575,000	219,003,750	240,904,125	348,061,661	400,270,910					
+Total	5,859,857,000	6,152,849,850	6,768,134,835	10,352,952,364	11,905,895,218					

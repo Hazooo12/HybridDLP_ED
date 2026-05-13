@@ -1,0 +1,66 @@
+services:
+  # Detection Engine (L3 Worker)
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    container_name: hybrid-dlp-worker
+    environment:
+      - SERVER_URL=${SERVER_URL:-}
+      - SERVER_API_KEY=${SERVER_API_KEY:-}
+      - DEVICE_ID=${DEVICE_ID:-dev-endpoint-1}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      # Persistent data
+      - worker-logs:/app/logs
+      - worker-models:/app/ml_models
+      - worker-database:/app/database
+      - worker-dataset:/app/dataset
+      # YARA rules (read-only)
+      - ./worker/yara_rules:/app/yara_rules:ro
+      # Shared runtime with agent (for SQLite events if needed)
+      - ./agent/runtime:/app/agent/runtime
+      # Test files (for testing)
+      - ./test_files:/app/test_files:ro
+    networks:
+      - hybrid-dlp-network
+    restart: unless-stopped
+
+  # Dashboard (Streamlit)
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: hybrid-dlp-dashboard
+    depends_on:
+      - worker
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+    ports:
+      - "8501:8501"
+    volumes:
+      # Dashboard logs
+      - dashboard-logs:/app/logs
+      # Share alerts from worker (if worker writes to shared location)
+      - worker-logs:/app/logs:ro
+    networks:
+      - hybrid-dlp-network
+    restart: unless-stopped
+
+volumes:
+  worker-logs:
+    driver: local
+  worker-models:
+    driver: local
+  worker-database:
+    driver: local
+  worker-dataset:
+    driver: local
+  dashboard-logs:
+    driver: local
+
+networks:
+  hybrid-dlp-network:
+    driver: bridge

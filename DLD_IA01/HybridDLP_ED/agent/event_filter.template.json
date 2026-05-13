@@ -1,0 +1,67 @@
+{
+  "enabled": true,
+  "verbose": false,
+  "excluded_processes": [
+    "rundll32.exe",
+    "svchost.exe",
+    "wmiprvse.exe",
+    "backgroundtaskhost.exe",
+    "searchhost.exe",
+    "startmenuexperiencehost.exe",
+    "msedgewebview2.exe",
+    "cmd.exe",
+    "python.exe",
+    "net1.exe",
+    "net.exe",
+    "nvcontainer.exe",
+    "dllhost.exe",
+    "Code.exe",
+    "explorer.exe",
+    "conhost.exe",
+    "git-remote-https.exe",
+    "git.exe",
+    "updater.exe",
+    "code.exe",
+    "audiodg.exe",
+    "docker.exe",
+    "wallpaper64.exe",
+    "wermgr.exe",
+    "obs-ffmpeg-mux.exe",
+    "obs64.exe",
+    "obs-virtualcam64.exe",
+    "smartscreen.exe"
+  ],
+  "excluded_event_types": [
+    "heartbeat"
+  ],
+  "excluded_path_patterns": [
+    "\\appdata\\local\\programs\\",
+    "\\appdata\\local\\packages\\",
+    "\\appdata\\local\\temp\\",
+    "\\appdata\\local\\microsoft\\edge\\user data\\",
+    "\\appdata\\local\\google\\chrome\\user data\\",
+    "\\appdata\\roaming\\cursor\\",
+    "\\windows\\",
+    "\\program files\\",
+    "\\program files (x86)\\",
+    "\\cache\\",
+    "\\code cache\\",
+    "\\gpucache\\",
+    "\\indexeddb\\",
+    "\\service worker\\",
+    "\\logs\\",
+    "\\Windows\\System32\\rundll32.exe",
+    "\\NvContainerRecoveryNvContainerLocalSystem.reg"
+  ],
+  "excluded_file_names": [
+    "WiredTiger.turtle",
+    "WiredTiger.wt",
+    "WiredTiger.turtle.set",
+    "WiredTigerLog.*",
+    "metrics.interim"
+  ],
+  "excluded_extensions": [
+    ".mkv"
+  ],
+  "excluded_domains": []
+}

@@ -1,0 +1,306 @@
+{
+  "api_version": "1.0",
+  "document": "Complete Event Schema - 4 Real Test Cases",
+  "description": "Định nghĩa đầy đủ object event từ worker xử lý, phù hợp với database admin",
+  "database_fields": 21,
+  "base_fields": 12,
+  "enrichment_fields": 9,
+  "timezone": "UTC+7 (Vietnam)",
+  "last_updated": "2026-04-16",
+  
+  "field_definitions": {
+    "BASE_FIELDS": {
+      "timestamp": "ISO8601 with timezone (e.g., 2026-04-16T10:30:45.123456+07:00)",
+      "risk_score": "float (0-10, higher = more risky)",
+      "action": "string (log|alert|warn|block)",
+      "file_path": "string (full path or null for clipboard)",
+      "file_name": "string (filename only or null)",
+      "keywords": "array of strings matched during detection",
+      "window_title": "string (active window title or empty)",
+      "process_name": "string (process name or empty)",
+      "user": "string (username or system user)",
+      "source": "string (clipboard|file|process|network|usb|print)",
+      "is_clipboard": "boolean (true nếu từ clipboard)",
+      "machine_name": "string (auto-set bởi server, không gửi từ worker)"
+    },
+    "ENRICHMENT_FIELDS": {
+      "yara_matches_count": "int (số YARA rules matched)",
+      "yara_rules_matched": "array of {rule: string, matched: array<string>}",
+      "behavioral_matches_count": "int (số behavioral rules matched)",
+      "behavioral_rules_matched": "array of {rule: string, score: float, reason: string}",
+      "risk_score_breakdown": "object {keyword_score, yara_score, behavioral_score, application_score, final_score}",
+      "action_reason": "string (why this action was chosen)",
+      "event_type": "string (clipboard|file|process|network|...)",
+      "content_size": "int (bytes analyzed)",
+      "check_duration_ms": "int (milliseconds to analyze)"
+    }
+  },
+
+  "test_cases": [
+    {
+      "scenario": "SCENARIO 1: Clipboard - Credit Card + API Key",
+      "description": "User copying payment card và API key từ email vào clipboard",
+      "severity": "HIGH_RISK",
+      "action_taken": "ALERT + LOG",
+      "detection_methods": ["YARA_PATTERN", "BEHAVIORAL_THRESHOLD"],
+      
+      "event": {
+        "timestamp": "2026-04-16T10:35:22.456789+07:00",
+        "risk_score": 6.5,
+        "action": "alert",
+        "file_path": null,
+        "file_name": null,
+        "keywords": ["credit card", "visa", "mastercard", "api key", "sk-proj"],
+        "window_title": "Gmail - Google Chrome",
+        "process_name": "chrome.exe",
+        "user": "john.doe",
+        "source": "clipboard",
+        "is_clipboard": true,
+        
+        "yara_matches_count": 2,
+        "yara_rules_matched": [
+          {
+            "rule": "CreditCardVisa",
+            "matched": ["4532-1234-5678-9012"]
+          },
+          {
+            "rule": "APIKeyPattern",
+            "matched": ["sk-proj-aB3cD9mE2fG7hI0jK..."]
+          }
+        ],
+        
+        "behavioral_matches_count": 2,
+        "behavioral_rules_matched": [
+          {
+            "rule": "BulkClipboardAccess",
+            "score": 0.92,
+            "reason": "Copied 50+ data items in 10 seconds"
+          },
+          {
+            "rule": "SensitiveDataCopy",
+            "score": 0.85,
+            "reason": "Multiple sensitive patterns copied together"
+          }
+        ],
+        
+        "risk_score_breakdown": {
+          "keyword_score": 3.0,
+          "yara_score": 2.5,
+          "behavioral_score": 1.8,
+          "application_score": 0.2,
+          "final_score": 6.5
+        },
+        
+        "action_reason": "Detected credit card (4532-****) + API key in clipboard | Bulk access pattern | High-risk data combination for exfiltration",
+        "event_type": "clipboard_access",
+        "content_size": 15240,
+        "check_duration_ms": 245
+      }
+    },
+
+    {
+      "scenario": "SCENARIO 2: File Copy - Financial Document to USB",
+      "description": "Employee copy financial report (Excel) từ Documents sang USB removable drive",
+      "severity": "CRITICAL_RISK",
+      "action_taken": "BLOCKED",
+      "detection_methods": ["YARA_PATTERN", "BEHAVIORAL_ML", "REMOVABLE_MEDIA"],
+      
+      "event": {
+        "timestamp": "2026-04-16T14:22:10.789012+07:00",
+        "risk_score": 7.8,
+        "action": "block",
+        "file_path": "C:\\Users\\alice.smith\\Documents\\Q1_2026_Financial_Report.xlsx",
+        "file_name": "Q1_2026_Financial_Report.xlsx",
+        "keywords": ["financial", "revenue", "profit", "salary", "employee cost", "budget"],
+        "window_title": "File Explorer - USB (E:)",
+        "process_name": "explorer.exe",
+        "user": "alice.smith",
+        "source": "file",
+        "is_clipboard": false,
+        
+        "yara_matches_count": 2,
+        "yara_rules_matched": [
+          {
+            "rule": "FinancialDataPattern",
+            "matched": ["revenue", "profit margin", "EBITDA", "salary expense"]
+          },
+          {
+            "rule": "CompanyConfidential",
+            "matched": ["CONFIDENTIAL", "INTERNAL USE ONLY"]
+          }
+        ],
+        
+        "behavioral_matches_count": 2,
+        "behavioral_rules_matched": [
+          {
+            "rule": "LargeFileCopyToRemovableMedia",
+            "score": 0.95,
+            "reason": "3.2 MB file copy to USB drive detected"
+          },
+          {
+            "rule": "SuspiciousCopyPattern",
+            "score": 0.88,
+            "reason": "Financial document copy during non-work hours (10:22 PM)"
+          }
+        ],
+        
+        "risk_score_breakdown": {
+          "keyword_score": 2.8,
+          "yara_score": 3.2,
+          "behavioral_score": 2.5,
+          "application_score": 0.3,
+          "final_score": 7.8
+        },
+        
+        "action_reason": "Financial document with sensitive data (revenue, profit, salary) detected | Copy to removable USB device | Anomalous time pattern (after hours) | File size 3.2 MB indicates potential mass data theft",
+        "event_type": "file_copy",
+        "content_size": 3200000,
+        "check_duration_ms": 1850
+      }
+    },
+
+    {
+      "scenario": "SCENARIO 3: Process Execution - Suspicious Script Engine",
+      "description": "PowerShell script execution từ temp folder với obfuscation patterns",
+      "severity": "MEDIUM_RISK",
+      "action_taken": "LOGGED",
+      "detection_methods": ["BEHAVIORAL_ML", "SCRIPT_SIGNATURE"],
+      
+      "event": {
+        "timestamp": "2026-04-16T09:15:33.234567+07:00",
+        "risk_score": 5.2,
+        "action": "log",
+        "file_path": "C:\\AppData\\Local\\Temp\\setup_update.ps1",
+        "file_name": "setup_update.ps1",
+        "keywords": ["powershell", "obfuscated", "script", "temp", "suspicious"],
+        "window_title": "Administrator: Windows PowerShell",
+        "process_name": "powershell.exe",
+        "user": "system",
+        "source": "process",
+        "is_clipboard": false,
+        
+        "yara_matches_count": 1,
+        "yara_rules_matched": [
+          {
+            "rule": "PowerShellObfuscation",
+            "matched": ["IEX(New-Object", "$([convert]::toutf8string", "Base64EncodedCommand"]
+          }
+        ],
+        
+        "behavioral_matches_count": 2,
+        "behavioral_rules_matched": [
+          {
+            "rule": "ScriptFromTempDirectory",
+            "score": 0.72,
+            "reason": "Executable script running from Temp folder"
+          },
+          {
+            "rule": "SuspiciousProcessHierarchy",
+            "score": 0.68,
+            "reason": "PowerShell spawned from Explorer.exe (unusual parent-child relationship)"
+          }
+        ],
+        
+        "risk_score_breakdown": {
+          "keyword_score": 0.5,
+          "yara_score": 2.0,
+          "behavioral_score": 2.4,
+          "application_score": 0.3,
+          "final_score": 5.2
+        },
+        
+        "action_reason": "PowerShell script with obfuscation patterns detected | Stored in Temp directory (non-standard execution location) | Unusual process hierarchy | Possible malware/ransomware preparation",
+        "event_type": "process_execution",
+        "content_size": 4096,
+        "check_duration_ms": 512
+      }
+    },
+
+    {
+      "scenario": "SCENARIO 4: Clipboard - Vietnam ID Card (CMND/CCCD)",
+      "description": "User paste CMND từ email vào Telegram message để gửi cho bạn",
+      "severity": "CRITICAL_RISK",
+      "action_taken": "BLOCKED",
+      "detection_methods": ["YARA_PATTERN", "PII_DETECTION"],
+      
+      "event": {
+        "timestamp": "2026-04-16T16:42:15.567890+07:00",
+        "risk_score": 8.5,
+        "action": "block",
+        "file_path": null,
+        "file_name": null,
+        "keywords": ["CMND", "CCCD", "ID card", "identification", "personal ID", "email"],
+        "window_title": "Telegram Desktop - Chat with Friend",
+        "process_name": "Telegram.exe",
+        "user": "nguyen.van.a",
+        "source": "clipboard",
+        "is_clipboard": true,
+        
+        "yara_matches_count": 2,
+        "yara_rules_matched": [
+          {
+            "rule": "VietnamIDCardNumber",
+            "matched": ["123456789100", "012345678901"]
+          },
+          {
+            "rule": "PersonalEmail",
+            "matched": ["john.doe@example.com", "user@company.vn"]
+          }
+        ],
+        
+        "behavioral_matches_count": 2,
+        "behavioral_rules_matched": [
+          {
+            "rule": "PIIToMessagingApp",
+            "score": 0.98,
+            "reason": "Personally Identifiable Information (ID card) being sent via messaging app"
+          },
+          {
+            "rule": "DocumentDataExtraction",
+            "score": 0.91,
+            "reason": "ID card image/data pasted into message (likely screenshot or OCR)"
+          }
+        ],
+        
+        "risk_score_breakdown": {
+          "keyword_score": 3.2,
+          "yara_score": 3.8,
+          "behavioral_score": 2.1,
+          "application_score": 0.4,
+          "final_score": 8.5
+        },
+        
+        "action_reason": "Vietnam ID card (CMND/CCCD) with numbers detected | Sensitive PII being transmitted to external messaging platform | High risk of identity theft | Violates data protection regulations (PDPA)",
+        "event_type": "clipboard_access",
+        "content_size": 8200,
+        "check_duration_ms": 380
+      }
+    }
+  ],
+
+  "integration_notes": {
+    "from_worker": "Worker xử lý event → Call enrich_event() → Tạo enriched object → Call sender.send(enriched_object)",
+    "to_database": "Server receive event → Validate → Extract 21 fields → Insert into SQLite events table",
+    "to_admin": "Admin query events → Load from database → Format JSON response → Display in dashboard detail modal",
+    "json_serialization": "All arrays and objects must be JSON-serializable. Use json.dumps() before sending.",
+    "timestamp_format": "Must be ISO8601 with timezone. Use datetime.isoformat() with timezone.utc or Vietnam TZ",
+    "numeric_values": "risk_score and check_duration_ms must be numbers, not strings"
+  },
+
+  "validation_checklist": {
+    "required_base_fields": ["timestamp", "risk_score", "action", "source", "user"],
+    "optional_enrichment": ["yara_matches_count", "yara_rules_matched", "behavioral_matches_count", "behavioral_rules_matched", "risk_score_breakdown", "action_reason", "event_type", "content_size", "check_duration_ms"],
+    "enum_values": {
+      "action": ["log", "alert", "warn", "block"],
+      "source": ["clipboard", "file", "process", "network", "usb", "print"]
+    },
+    "data_types": {
+      "risk_score": "float (0-10)",
+      "yara_matches_count": "int (>=0)",
+      "behavioral_matches_count": "int (>=0)",
+      "content_size": "int (>=0)",
+      "check_duration_ms": "int (>=0)",
+      "is_clipboard": "boolean"
+    }
+  }
+}

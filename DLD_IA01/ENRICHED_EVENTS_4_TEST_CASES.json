@@ -1,0 +1,209 @@
+[
+  {
+    "_meta": "CASE 1: Clipboard - Credit Card + API Key",
+    "_severity": "HIGH",
+    "_description": "User copying payment card and API key from email to clipboard",
+
+    "timestamp": "2026-04-16T10:35:22.456789+07:00",
+    "risk_score": 6.5,
+    "action": "alert",
+    "file_path": null,
+    "file_name": null,
+    "keywords": ["credit card", "visa", "mastercard", "api key", "sk-proj"],
+    "window_title": "Gmail - Google Chrome",
+    "process_name": "chrome.exe",
+    "user": "john.doe",
+    "source": "clipboard",
+    "is_clipboard": true,
+    "yara_matches_count": 2,
+    "yara_rules_matched": [
+      {
+        "rule": "CreditCardVisa",
+        "matched": ["4532-1234-5678-9012"]
+      },
+      {
+        "rule": "APIKeyPattern",
+        "matched": ["sk-proj-aB3cD9mE2fG7hI0jK..."]
+      }
+    ],
+    "behavioral_matches_count": 2,
+    "behavioral_rules_matched": [
+      {
+        "rule": "BulkClipboardAccess",
+        "score": 0.92,
+        "reason": "Copied 50+ data items in 10 seconds"
+      },
+      {
+        "rule": "SensitiveDataCopy",
+        "score": 0.85,
+        "reason": "Multiple sensitive patterns copied together"
+      }
+    ],
+    "risk_score_breakdown": {
+      "keyword_score": 3.0,
+      "yara_score": 2.5,
+      "behavioral_score": 1.8,
+      "application_score": 0.2,
+      "final_score": 6.5
+    },
+    "action_reason": "Detected credit card (4532-****) + API key in clipboard | Bulk access pattern | High-risk data combination",
+    "event_type": "clipboard_access",
+    "content_size": 15240,
+    "check_duration_ms": 245
+  },
+
+  {
+    "_meta": "CASE 2: File Copy - Financial Document to USB",
+    "_severity": "CRITICAL",
+    "_description": "Employee copying financial report (Excel) from Documents to USB removable drive",
+
+    "timestamp": "2026-04-16T14:22:10.789012+07:00",
+    "risk_score": 7.8,
+    "action": "block",
+    "file_path": "C:\\Users\\alice.smith\\Documents\\Q1_2026_Financial_Report.xlsx",
+    "file_name": "Q1_2026_Financial_Report.xlsx",
+    "keywords": ["financial", "revenue", "profit", "salary", "employee cost", "budget"],
+    "window_title": "File Explorer - USB (E:)",
+    "process_name": "explorer.exe",
+    "user": "alice.smith",
+    "source": "file",
+    "is_clipboard": false,
+    "yara_matches_count": 2,
+    "yara_rules_matched": [
+      {
+        "rule": "FinancialDataPattern",
+        "matched": ["revenue", "profit margin", "EBITDA", "salary expense"]
+      },
+      {
+        "rule": "CompanyConfidential",
+        "matched": ["CONFIDENTIAL", "INTERNAL USE ONLY"]
+      }
+    ],
+    "behavioral_matches_count": 2,
+    "behavioral_rules_matched": [
+      {
+        "rule": "LargeFileCopyToRemovableMedia",
+        "score": 0.95,
+        "reason": "3.2 MB file copy to USB drive detected"
+      },
+      {
+        "rule": "SuspiciousCopyPattern",
+        "score": 0.88,
+        "reason": "Financial document copy during non-work hours (10:22 PM)"
+      }
+    ],
+    "risk_score_breakdown": {
+      "keyword_score": 2.8,
+      "yara_score": 3.2,
+      "behavioral_score": 2.5,
+      "application_score": 0.3,
+      "final_score": 7.8
+    },
+    "action_reason": "Financial document with sensitive data | Copy to removable USB device | Anomalous time pattern | Mass data theft indicator",
+    "event_type": "file_copy",
+    "content_size": 3200000,
+    "check_duration_ms": 1850
+  },
+
+  {
+    "_meta": "CASE 3: Process Execution - Suspicious PowerShell Script",
+    "_severity": "MEDIUM",
+    "_description": "PowerShell script execution from temp folder with obfuscation patterns",
+
+    "timestamp": "2026-04-16T09:15:33.234567+07:00",
+    "risk_score": 5.2,
+    "action": "log",
+    "file_path": "C:\\AppData\\Local\\Temp\\setup_update.ps1",
+    "file_name": "setup_update.ps1",
+    "keywords": ["powershell", "obfuscated", "script", "temp", "suspicious"],
+    "window_title": "Administrator: Windows PowerShell",
+    "process_name": "powershell.exe",
+    "user": "system",
+    "source": "process",
+    "is_clipboard": false,
+    "yara_matches_count": 1,
+    "yara_rules_matched": [
+      {
+        "rule": "PowerShellObfuscation",
+        "matched": ["IEX(New-Object", "$([convert]::toutf8string", "Base64EncodedCommand"]
+      }
+    ],
+    "behavioral_matches_count": 2,
+    "behavioral_rules_matched": [
+      {
+        "rule": "ScriptFromTempDirectory",
+        "score": 0.72,
+        "reason": "Executable script running from Temp folder"
+      },
+      {
+        "rule": "SuspiciousProcessHierarchy",
+        "score": 0.68,
+        "reason": "PowerShell spawned from Explorer.exe"
+      }
+    ],
+    "risk_score_breakdown": {
+      "keyword_score": 0.5,
+      "yara_score": 2.0,
+      "behavioral_score": 2.4,
+      "application_score": 0.3,
+      "final_score": 5.2
+    },
+    "action_reason": "PowerShell with obfuscation patterns | Temp directory execution | Unusual process hierarchy | Possible malware preparation",
+    "event_type": "process_execution",
+    "content_size": 4096,
+    "check_duration_ms": 512
+  },
+
+  {
+    "_meta": "CASE 4: Clipboard - Vietnam ID Card (CMND/CCCD)",
+    "_severity": "CRITICAL",
+    "_description": "User pasting CMND from email into Telegram message to send to friend",
+
+    "timestamp": "2026-04-16T16:42:15.567890+07:00",
+    "risk_score": 8.5,
+    "action": "block",
+    "file_path": null,
+    "file_name": null,
+    "keywords": ["CMND", "CCCD", "ID card", "identification", "personal ID", "email"],
+    "window_title": "Telegram Desktop - Chat with Friend",
+    "process_name": "Telegram.exe",
+    "user": "nguyen.van.a",
+    "source": "clipboard",
+    "is_clipboard": true,
+    "yara_matches_count": 2,
+    "yara_rules_matched": [
+      {
+        "rule": "VietnamIDCardNumber",
+        "matched": ["123456789100", "012345678901"]
+      },
+      {
+        "rule": "PersonalEmail",
+        "matched": ["john.doe@example.com", "user@company.vn"]
+      }
+    ],
+    "behavioral_matches_count": 2,
+    "behavioral_rules_matched": [
+      {
+        "rule": "PIIToMessagingApp",
+        "score": 0.98,
+        "reason": "Personally Identifiable Information sent via messaging app"
+      },
+      {
+        "rule": "DocumentDataExtraction",
+        "score": 0.91,
+        "reason": "ID card data pasted into message"
+      }
+    ],
+    "risk_score_breakdown": {
+      "keyword_score": 3.2,
+      "yara_score": 3.8,
+      "behavioral_score": 2.1,
+      "application_score": 0.4,
+      "final_score": 8.5
+    },
+    "action_reason": "Vietnam ID card (CMND/CCCD) detected | Sensitive PII transmitted to external messaging | High identity theft risk | PDPA violation",
+    "event_type": "clipboard_access",
+    "content_size": 8200,
+    "check_duration_ms": 380
+  }
+]

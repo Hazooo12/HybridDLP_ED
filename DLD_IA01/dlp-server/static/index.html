@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Center</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #f4f6fb;
+    --surface:  #ffffff;
+    --border:   #e2e6ef;
+    --text:     #1a202c;
+    --muted:    #64748b;
+    --blue:     #1e40af;
+    --blue-bg:  #eff6ff;
+    --green:    #166534;
+    --green-bg: #f0fdf4;
+    --amber:    #92400e;
+    --amber-bg: #fffbeb;
+    --red:      #991b1b;
+    --red-bg:   #fef2f2;
+    --sidebar:  #1e293b;
+    /* modal palette */
+    --m-bg:     #161d2e;
+    --m-surface:#1e2840;
+    --m-border: #2d3a56;
+    --m-text:   #e2e8f0;
+    --m-muted:  #7b8fae;
+    --m-accent: #3b82f6;
+    --m-accent2:#22d3ee;
+    --m-entry:  #232f47;
+  }
+
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 240px; flex-shrink: 0;
+    background: var(--sidebar); color: #cbd5e1;
+    padding: 20px 16px; display: flex; flex-direction: column; gap: 20px;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  #sidebar h2 { font-size: 13px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .filter-label { font-size: 12px; color: #94a3b8; margin-bottom: 4px; display: block; }
+  .filter-group { display: flex; flex-direction: column; gap: 10px; }
+  #sidebar select, #sidebar input[type=range] { width: 100%; }
+  #sidebar select {
+    background: #334155; border: 1px solid #475569; border-radius: 6px;
+    color: #e2e8f0; padding: 6px 8px; font-size: 13px;
+  }
+  .range-row { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  input[type=range] { accent-color: #3b82f6; }
+  .machine-list { display: flex; flex-direction: column; gap: 4px; }
+  .machine-chip {
+    font-size: 11px; padding: 3px 8px; border-radius: 20px;
+    background: #0f172a; border: 1px solid #334155; color: #94a3b8;
+    cursor: pointer; transition: all .15s; text-align: left;
+  }
+  .machine-chip.active { background: #1d4ed8; border-color: #3b82f6; color: #fff; }
+  .sidebar-stat { font-size: 12px; color: #64748b; line-height: 1.7; }
+  .sidebar-stat span { color: #94a3b8; }
+
+  /* ── Main ── */
+  #main { flex: 1; padding: 24px; overflow-x: hidden; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 24px; }
+  .header h1 { font-size: 26px; font-weight: 700; color: var(--blue); }
+  .header p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-header {
+    padding: 8px 16px; border: none; border-radius: 6px;
+    cursor: pointer; font-weight: 600; font-size: 13px;
+    transition: filter .15s;
+  }
+  .btn-header:hover { filter: brightness(1.12); }
+  .btn-blue   { background: #1e40af; color: white; }
+  .btn-orange { background: #d97706; color: white; }
+
+  /* KPI row */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .kpi {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .kpi .label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .kpi .value { font-size: 28px; font-weight: 700; }
+  .kpi.blue  { border-left: 4px solid #3b82f6; } .kpi.blue  .value { color: #1d4ed8; }
+  .kpi.green { border-left: 4px solid #22c55e; } .kpi.green .value { color: #166534; }
+  .kpi.red   { border-left: 4px solid #ef4444; } .kpi.red   .value { color: #991b1b; }
+  .kpi.amber { border-left: 4px solid #f59e0b; } .kpi.amber .value { color: #92400e; }
+
+  /* Charts */
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  .chart-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px;
+  }
+  .chart-card h3 { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 12px; }
+  .chart-wrap { position: relative; height: 180px; }
+
+  /* Table */
+  .table-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px;
+  }
+  .table-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+  .table-wrap { overflow-x: auto; max-height: 380px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    position: sticky; top: 0; background: #f8fafc;
+    padding: 8px 10px; text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
+  }
+  tbody tr:hover { background: #f8fafc; }
+  tbody td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+  .pill {
+    display: inline-block; font-size: 11px; font-weight: 500;
+    padding: 2px 8px; border-radius: 20px; white-space: nowrap;
+  }
+  .pill-allowed  { background: var(--green-bg); color: var(--green); }
+  .pill-alerted  { background: var(--amber-bg); color: var(--amber); }
+  .pill-blocked  { background: var(--red-bg);   color: var(--red); }
+  .sev-none     { background: #f1f5f9; color: #64748b; }
+  .sev-low      { background: #f0fdf4; color: #166534; }
+  .sev-medium   { background: var(--amber-bg); color: var(--amber); }
+  .sev-high     { background: #fff7ed; color: #9a3412; }
+  .sev-critical { background: var(--red-bg);   color: var(--red); }
+  .kw-tag { font-size: 10px; background: #e0e7ff; color: #3730a3; padding: 1px 5px; border-radius: 3px; margin-right: 2px; }
+
+  /* Pulse dot */
+  .live-dot { display: inline-block; width: 7px; height: 7px; background: #22c55e; border-radius: 50%; margin-right: 6px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* ── Shared Modal Backdrop ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.65); z-index: 998;
+    padding: 20px; overflow-y: auto;
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+
+  /* ── Light modals (detail / agent) ── */
+  .modal-box-light {
+    background: white; border-radius: 10px;
+    padding: 24px; width: 100%; position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: none; border: none; font-size: 22px;
+    cursor: pointer; color: #94a3b8; line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-title {
+    font-size: 18px; font-weight: 700; color: var(--blue); margin-bottom: 20px;
+  }
+
+  /* ═══════════════════════════════════════════
+     RULES CONFIG MODAL — dark theme
+  ═══════════════════════════════════════════ */
+  #rulesConfigModal { z-index: 1000; }
+
+  .rcm-box {
+    background: var(--m-bg);
+    border: 1px solid var(--m-border);
+    border-radius: 14px;
+    width: 100%; max-width: 860px;
+    max-height: 88vh; overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0,0,0,.6);
+  }
+
+  /* header strip */
+  .rcm-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--m-border);
+    flex-shrink: 0;
+  }
+  .rcm-header-left { display: flex; align-items: center; gap: 12px; }
+  .rcm-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: linear-gradient(135deg, #1d4ed8, #0ea5e9);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .rcm-title { font-size: 16px; font-weight: 700; color: var(--m-text); }
+  .rcm-sub   { font-size: 11px; color: var(--m-muted); margin-top: 1px; }
+  .rcm-close {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--m-surface); border: 1px solid var(--m-border);
+    color: var(--m-muted); font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .rcm-close:hover { background: var(--m-border); color: var(--m-text); }
+
+  /* tab bar */
+  .rcm-tabs {
+    display: flex; gap: 4px;
+    padding: 12px 24px 0;
+    border-bottom: 1px solid var(--m-border);
+    flex-shrink: 0;
+  }
+  .rcm-tab {
+    padding: 8px 16px 10px; border: none; background: none;
+    color: var(--m-muted); font-size: 13px; font-weight: 500;
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: all .15s; white-space: nowrap;
+  }
+  .rcm-tab:hover { color: var(--m-text); }
+  .rcm-tab.active { color: var(--m-accent); border-bottom-color: var(--m-accent); }
+
+  /* body */
+  .rcm-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .rcm-panel { display: none; }
+  .rcm-panel.active { display: block; }
+
+  .rcm-panel-title {
+    font-size: 14px; font-weight: 600; color: var(--m-text); margin-bottom: 4px;
+  }
+  .rcm-panel-desc { font-size: 12px; color: var(--m-muted); margin-bottom: 16px; }
+
+  /* toast */
+  .rcm-toast {
+    padding: 10px 14px; border-radius: 8px;
+    font-size: 12px; margin-bottom: 14px;
+    display: none;
+  }
+  .rcm-toast.show { display: block; }
+  .rcm-toast.success { background: rgba(34,197,94,.15); color: #86efac; border: 1px solid rgba(34,197,94,.3); }
+  .rcm-toast.error   { background: rgba(239,68,68,.15);  color: #fca5a5; border: 1px solid rgba(239,68,68,.3); }
+  .rcm-toast.loading { background: rgba(59,130,246,.12); color: #93c5fd; border: 1px solid rgba(59,130,246,.3); }
+
+  /* input row */
+  .rcm-input-row {
+    display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+  }
+  .rcm-input {
+    flex: 1; min-width: 200px;
+    background: var(--m-entry); border: 1px solid var(--m-border);
+    border-radius: 7px; color: var(--m-text); font-size: 13px;
+    padding: 8px 12px; outline: none;
+    transition: border-color .15s;
+  }
+  .rcm-input:focus { border-color: var(--m-accent); }
+  .rcm-input::placeholder { color: var(--m-muted); }
+  .rcm-select {
+    background: var(--m-entry); border: 1px solid var(--m-border);
+    border-radius: 7px; color: var(--m-text); font-size: 13px;
+    padding: 8px 12px; outline: none; cursor: pointer;
+  }
+  .rcm-btn {
+    padding: 8px 16px; border: none; border-radius: 7px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: filter .15s; white-space: nowrap;
+  }
+  .rcm-btn:hover { filter: brightness(1.15); }
+  .rcm-btn-add  { background: linear-gradient(135deg,#1d4ed8,#0ea5e9); color: #fff; }
+  .rcm-btn-save { background: linear-gradient(135deg,#059669,#0ea5e9); color: #fff; }
+  .rcm-btn-ghost { background: var(--m-surface); border: 1px solid var(--m-border); color: var(--m-muted); }
+
+  /* tags cloud */
+  .rcm-tags-wrap {
+    min-height: 60px;
+    background: var(--m-entry); border: 1px solid var(--m-border);
+    border-radius: 8px; padding: 12px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .rcm-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.35);
+    border-radius: 20px; padding: 4px 10px;
+    font-size: 12px; color: #93c5fd;
+  }
+  .rcm-tag-del {
+    background: none; border: none; color: #f87171;
+    cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
+    transition: color .15s;
+  }
+  .rcm-tag-del:hover { color: #ef4444; }
+  .rcm-tag-section { font-size: 12px; font-weight: 600; color: var(--m-muted); margin: 14px 0 8px; }
+  .rcm-empty { color: var(--m-muted); font-size: 12px; padding: 8px 0; }
+
+  /* Stats grid */
+  .rcm-stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 20px;
+  }
+  .rcm-stat {
+    background: var(--m-surface); border: 1px solid var(--m-border);
+    border-radius: 10px; padding: 16px; text-align: center;
+  }
+  .rcm-stat-val  { font-size: 30px; font-weight: 700; color: var(--m-accent); }
+  .rcm-stat-label{ font-size: 11px; color: var(--m-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .04em; }
+
+  /* info box */
+  .rcm-info {
+    background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2);
+    border-left: 3px solid #22c55e; border-radius: 8px;
+    padding: 12px 16px; font-size: 12px; color: #86efac;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  /* footer */
+  .rcm-footer {
+    display: flex; justify-content: flex-end; gap: 8px;
+    padding: 14px 24px;
+    border-top: 1px solid var(--m-border);
+    flex-shrink: 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .charts-row { grid-template-columns: 1fr; }
+    .kpi-row    { grid-template-columns: 1fr 1fr; }
+    #sidebar    { display: none; }
+    .rcm-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside id="sidebar">
+  <div>
+    <h2>🔍 Bộ lọc</h2>
+    <div class="filter-group">
+      <div>
+        <label class="filter-label">Action</label>
+        <select id="fAction">
+          <option value="">Tất cả</option>
+          <option value="allowed">Allowed</option>
+          <option value="alerted">Alerted</option>
+          <option value="blocked">Blocked</option>
+        </select>
+      </div>
+      <div>
+        <label class="filter-label">Risk Score tối thiểu: <b id="riskVal">0</b></label>
+        <input type="range" id="fRisk" min="0" max="10" step="0.5" value="0"
+          oninput="document.getElementById('riskVal').textContent=this.value; applyFilters()">
+        <div class="range-row"><span>0</span><span>10</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h2>🖥 Máy</h2>
+    <div class="machine-list" id="machineList">
+      <button class="machine-chip active" onclick="filterMachine(this,'')">Tất cả</button>
+    </div>
+  </div>
+
+  <div>
+    <h2>📊 Thống Kê</h2>
+    <div class="sidebar-stat" id="sidebarStat">Đang tải...</div>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<main id="main">
+  <div class="header">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h1>Security Center</h1>
+      <div class="header-actions">
+        <button class="btn-header btn-orange" onclick="openRulesConfigModal()">⚙️ Rules Config</button>
+        <button class="btn-header btn-blue"   onclick="openEndpointManagement()">🔌 Quản Lý Endpoints</button>
+      </div>
+    </div>
+    <p><span class="live-dot"></span>Live &nbsp;|&nbsp; <span id="lastUpdate">—</span></p>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-row">
+    <div class="kpi blue">  <div class="label"> TỔNG SỰ KIỆN</div><div class="value" id="kTotal">—</div></div>
+    <div class="kpi green"> <div class="label"> LOW</div>          <div class="value" id="kLow">—</div></div>
+    <div class="kpi red">   <div class="label"> HIGH</div>        <div class="value" id="kHigh">—</div></div>
+    <div class="kpi amber"> <div class="label"> BLOCKED</div>      <div class="value" id="kBlocked">—</div></div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="chart-card">
+      <h3>📈 Trend (theo phút)</h3>
+      <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>🍩 Risk Ratio</h3>
+      <div class="chart-wrap"><canvas id="chartRisk"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <h3>🔑 Top Keywords</h3>
+      <div class="chart-wrap"><canvas id="chartKw"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;"> Alerts Log <span id="rowCount" style="font-size:12px;color:var(--muted);font-weight:400"></span></h3>
+      <button onclick="openColumnPickerModal()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:4px;transition:all .15s;" title="Chuẩn bị cột hiển thị" onmouseover="this.style.background='var(--border)';this.style.color='var(--text)'" onmouseout="this.style.background='none';this.style.color='var(--muted)'">⚙️</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Máy</th><th>Thời gian</th><th>Severity</th>
+            <th>Action</th><th>Risk</th><th>User</th>
+            <th>File</th><th>Source</th><th>Keywords</th><th>Process</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: Column Picker
+══════════════════════════════════════════════════════ -->
+<div id="columnPickerModal" class="modal-overlay">
+  <div class="modal-box-light" style="max-width:500px;">
+    <button class="modal-close" onclick="closeColumnPickerModal()">✕</button>
+    <div class="modal-title">📋 Chuẩn Bị Cột Hiển Thị</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+      <span style="font-size:12px;color:var(--muted);">Chọn các cột bạn muốn hiển thị trong bảng Alerts Log:</span>
+      <div id="columnCheckboxes" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;">
+        <!-- Generated by JavaScript -->
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="resetColumnsToDefault()"
+        style="padding:8px 16px;background:#e2e6ef;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">↺ Mặc định</button>
+      <button onclick="closeColumnPickerModal()"
+        style="padding:8px 16px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">✓ Xong</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: Chi tiết event
+══════════════════════════════════════════════════════ -->
+<div id="detailModal" class="modal-overlay">
+  <div class="modal-box-light" style="max-width:600px;max-height:80vh;overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">📋 Chi Tiết Sự Kiện</div>
+    <div id="detailContent" style="font-size:13px;line-height:1.8;">
+      <p>Đang tải...</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: Thêm Agent
+══════════════════════════════════════════════════════ -->
+<div id="addAgentModal" class="modal-overlay">
+  <div class="modal-box-light" style="max-width:500px;">
+    <button class="modal-close" onclick="closeAddAgentModal()">✕</button>
+    <div class="modal-title">➕ Thêm Agent Mới</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">API Key</label>
+        <input type="text" id="newAgentKey" placeholder="Ví dụ: dlp-key-my-new-agent"
+          style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:monospace;">
+        <button onclick="generateApiKey()"
+          style="margin-top:4px;padding:4px 8px;background:#e2e6ef;border:none;border-radius:4px;cursor:pointer;font-size:11px;">🔀 Tạo ngẫu nhiên</button>
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Tên Máy</label>
+        <input type="text" id="newMachineName" placeholder="Ví dụ: PC-Accounting-01"
+          style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Tên Hiển Thị</label>
+        <input type="text" id="newDisplayName" placeholder="Ví dụ: PC-KeToan-01 (tùy chọn)"
+          style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+      </div>
+      <div id="agentMessage" style="display:none;padding:10px;border-radius:6px;font-size:12px;"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="saveNewAgent()"
+          style="flex:1;padding:10px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">➕ Thêm Agent</button>
+        <button onclick="closeAddAgentModal()"
+          style="flex:1;padding:10px;background:#e2e6ef;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">Hủy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: Quản lý Endpoints
+══════════════════════════════════════════════════════ -->
+<div id="endpointManagementModal" class="modal-overlay" style="align-items:flex-start;padding-top:20px;">
+  <div class="modal-box-light" style="max-width:1000px;max-height:90vh;overflow-y:auto;">
+    <button class="modal-close" onclick="closeEndpointManagement()">✕</button>
+    <div class="modal-title">🔌 Quản Lý Endpoints (Agents)</div>
+    <div style="margin-bottom:16px;display:flex;gap:8px;">
+      <button onclick="openAddAgentModal()"
+        style="padding:8px 16px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">➕ Thêm Endpoint Mới</button>
+      <button onclick="refreshEndpointList()"
+        style="padding:8px 16px;background:#e2e6ef;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;">🔄 Làm mới</button>
+    </div>
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:6px;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:1px solid var(--border);">
+            <th style="padding:12px;text-align:left;font-weight:600;color:var(--muted);text-transform:uppercase;font-size:10px;">Trạng Thái</th>
+            <th style="padding:12px;text-align:left;font-weight:600;color:var(--muted);text-transform:uppercase;font-size:10px;">Tên Hiển Thị</th>
+            <th style="padding:12px;text-align:left;font-weight:600;color:var(--muted);text-transform:uppercase;font-size:10px;">Tên Máy</th>
+            <th style="padding:12px;text-align:left;font-weight:600;color:var(--muted);text-transform:uppercase;font-size:10px;">API Key</th>
+            <th style="padding:12px;text-align:left;font-weight:600;color:var(--muted);text-transform:uppercase;font-size:10px;">Lần Kết Nối Cuối</th>
+            <th style="padding:12px;text-align:left;font-weight:600;color:var(--muted);text-transform:uppercase;font-size:10px;">Ngày Tạo</th>
+            <th style="padding:12px;text-align:left;font-weight:600;color:var(--muted);text-transform:uppercase;font-size:10px;">Hành Động</th>
+          </tr>
+        </thead>
+        <tbody id="endpointTableBody">
+          <tr><td colspan="7" style="padding:20px;text-align:center;color:#94a3b8;">Đang tải...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: Rules Configuration  (dark)
+══════════════════════════════════════════════════════ -->
+<div id="rulesConfigModal" class="modal-overlay" style="align-items:flex-start;padding-top:20px;">
+  <div class="rcm-box">
+
+    <!-- header -->
+    <div class="rcm-header">
+      <div class="rcm-header-left">
+        <div class="rcm-icon">⚙️</div>
+        <div>
+          <div class="rcm-title">Behavioral Rules Config</div>
+          <div class="rcm-sub">Chỉnh sửa danh sách, ngưỡng &amp; bật/tắt rules — áp dụng cho tất cả endpoints</div>
+        </div>
+      </div>
+      <button class="rcm-close" onclick="closeRulesConfigModal()">✕</button>
+    </div>
+
+    <!-- tab bar -->
+    <div class="rcm-tabs">
+      <button class="rcm-tab active"  onclick="rcmTab(this,'rcm-keywords')">🔑 Keywords</button>
+      <button class="rcm-tab"         onclick="rcmTab(this,'rcm-domains')">🌐 Domains</button>
+      <button class="rcm-tab"         onclick="rcmTab(this,'rcm-apps')">💻 Apps</button>
+      <button class="rcm-tab"         onclick="rcmTab(this,'rcm-thresholds')">🎚 Thresholds</button>
+      <button class="rcm-tab"         onclick="rcmTab(this,'rcm-stats')">📊 Stats</button>
+    </div>
+
+    <!-- body -->
+    <div class="rcm-body">
+      <div id="rcmToast" class="rcm-toast"></div>
+
+      <!-- ── Keywords ── -->
+      <div id="rcm-keywords" class="rcm-panel active">
+        <div class="rcm-panel-title">Sensitive Title Keywords</div>
+        <div class="rcm-panel-desc">Từ khoá xuất hiện trong tiêu đề cửa sổ sẽ bị đánh dấu là đích nhạy cảm.</div>
+        <div class="rcm-input-row">
+          <input id="rcmKwInput" class="rcm-input" placeholder="Nhập keyword (vd: mattermost, notion…)" onkeydown="if(event.key==='Enter')rcmAddKeyword()">
+          <button class="rcm-btn rcm-btn-add" onclick="rcmAddKeyword()">+ Thêm</button>
+        </div>
+        <div class="rcm-tags-wrap" id="rcmKwTags"><span class="rcm-empty">Đang tải…</span></div>
+      </div>
+
+      <!-- ── Domains ── -->
+      <div id="rcm-domains" class="rcm-panel">
+        <div class="rcm-panel-title">Sensitive Domains</div>
+        <div class="rcm-panel-desc">Domain được coi là đích rò rỉ dữ liệu (AI, email, cloud, messaging…).</div>
+        <div class="rcm-input-row">
+          <input id="rcmDomInput" class="rcm-input" placeholder="Nhập domain (vd: notion.so, pastebin.com…)" onkeydown="if(event.key==='Enter')rcmAddDomain()">
+          <button class="rcm-btn rcm-btn-add" onclick="rcmAddDomain()">+ Thêm</button>
+        </div>
+        <div class="rcm-tags-wrap" id="rcmDomTags"><span class="rcm-empty">Đang tải…</span></div>
+      </div>
+
+      <!-- ── Apps ── -->
+      <div id="rcm-apps" class="rcm-panel">
+        <div class="rcm-panel-title">Applications</div>
+        <div class="rcm-panel-desc">Quản lý browser và messaging apps bị theo dõi.</div>
+        <div class="rcm-input-row">
+          <input id="rcmAppInput" class="rcm-input" placeholder="Tên file exe (vd: opera.exe, viber.exe…)" onkeydown="if(event.key==='Enter')rcmAddApp()">
+          <select id="rcmAppType" class="rcm-select">
+            <option value="browser">Browser</option>
+            <option value="messaging">Messaging</option>
+          </select>
+          <button class="rcm-btn rcm-btn-add" onclick="rcmAddApp()">+ Thêm</button>
+        </div>
+        <div class="rcm-tag-section">🌐 Browser Apps</div>
+        <div class="rcm-tags-wrap" id="rcmBrowserTags"><span class="rcm-empty">Đang tải…</span></div>
+        <div class="rcm-tag-section">💬 Messaging Apps</div>
+        <div class="rcm-tags-wrap" id="rcmMsgTags"><span class="rcm-empty">Đang tải…</span></div>
+      </div>
+
+      <!-- ── Thresholds ── -->
+      <div id="rcm-thresholds" class="rcm-panel">
+        <div class="rcm-panel-title">Thresholds &amp; Limits</div>
+        <div class="rcm-panel-desc">Chỉnh ngưỡng số — thay đổi áp dụng sau lần sync tiếp theo của endpoint.</div>
+        <div id="rcmThresholdFields" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;"></div>
+        <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+          <button class="rcm-btn rcm-btn-save" onclick="rcmSaveThresholds()">💾 Lưu Thresholds</button>
+        </div>
+      </div>
+
+      <!-- ── Stats ── -->
+      <div id="rcm-stats" class="rcm-panel">
+        <div class="rcm-panel-title">Config Statistics</div>
+        <div class="rcm-panel-desc">Tổng quan cấu hình hiện tại đang áp dụng.</div>
+        <div class="rcm-stats-grid" id="rcmStatsGrid">
+          <!-- filled by JS -->
+        </div>
+        <div class="rcm-info">
+          <span>Phiên bản config: <strong id="rcmVersion">—</strong> &nbsp;|&nbsp; Cập nhật: <strong id="rcmUpdatedAt">—</strong></span>
+          <button class="rcm-btn rcm-btn-ghost" style="font-size:12px;" onclick="rcmLoadAll()">↻ Reload</button>
+        </div>
+      </div>
+    </div><!-- /rcm-body -->
+
+    <div class="rcm-footer">
+      <button class="rcm-btn rcm-btn-ghost" onclick="closeRulesConfigModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════ -->
+<script>
+// ════════════════════════════════════
+// Shared state
+// ════════════════════════════════════
+let allEvents   = [];
+let selectedMachine = '';
+let charts      = {};
+let allAgents   = [];
+let adminKey    = sessionStorage.getItem('adminKey') || '';
+
+const API_RULES = '/api/rules';   // Rules Config backend
+
+// ════════════════════════════════════
+// Severity helpers
+// ════════════════════════════════════
+function severity(score) {
+  const s = parseFloat(score);
+  if (isNaN(s) || s <= 0) return 'None';
+  if (s < 4) return 'Low';
+  if (s < 7) return 'Medium';
+  if (s < 9) return 'High';
+  return 'Critical';
+}
+const SEV_COLOR = { None:'#94a3b8', Low:'#22c55e', Medium:'#f59e0b', High:'#f97316', Critical:'#ef4444' };
+
+// ════════════════════════════════════
+// Admin key helper
+// ════════════════════════════════════
+function ensureAdminKey() {
+  if (!adminKey) {
+    adminKey = prompt('Nhập Admin Key:');
+    if (adminKey) sessionStorage.setItem('adminKey', adminKey);
+  }
+  return adminKey;
+}
+
+// ════════════════════════════════════
+// Page initialization
+// ════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  loadColumnSettings();
+  fetchData();
+  setInterval(fetchData, 1000); // Auto-refresh every 30 seconds
+});
+
+// ════════════════════════════════════
+// Main data fetch & render
+// ════════════════════════════════════
+async function fetchData() {
+  try {
+    const action  = document.getElementById('fAction').value;
+    const minRisk = document.getElementById('fRisk').value;
+    let url = `/api/events?limit=500&min_risk=${minRisk}`;
+    if (action)          url += `&action=${action}`;
+    if (selectedMachine) url += `&machine=${encodeURIComponent(selectedMachine)}`;
+
+    const [evR, stR, mcR, agR] = await Promise.all([
+      fetch(url), fetch('/api/stats'), fetch('/api/machines'), fetch('/api/agents'),
+    ]);
+    allEvents = await evR.json();
+    const stats    = await stR.json();
+    const machines = await mcR.json();
+    allAgents      = await agR.json();
+    render(stats, machines);
+  } catch(e) { console.error('Fetch error:', e); }
+}
+
+function applyFilters() { fetchData(); }
+function filterMachine(el, name) {
+  selectedMachine = name;
+  document.querySelectorAll('.machine-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  fetchData();
+}
+
+// ════════════════════════════════════
+// Render
+// ════════════════════════════════════
+function render(stats, machines) {
+  const ev = allEvents;
+  const sc = { None:0, Low:0, Medium:0, High:0, Critical:0 };
+  ev.forEach(e => sc[severity(e.risk_score)]++);
+
+  document.getElementById('kTotal').textContent   = stats.total;
+  document.getElementById('kLow').textContent     = sc.Low;
+  document.getElementById('kHigh').textContent    = sc.High + sc.Critical;
+  document.getElementById('kBlocked').textContent = ev.filter(e => e.action === 'blocked').length;
+  document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('vi-VN');
+  document.getElementById('sidebarStat').innerHTML =
+    `<span>Tổng DB:</span> ${stats.total}<br><span>Alerted:</span> ${stats.alerted}<br>` +
+    `<span>Blocked:</span> ${stats.blocked}<br><span>High+:</span> ${stats.high_plus}`;
+
+  const list = document.getElementById('machineList');
+  const existing = [...list.querySelectorAll('.machine-chip')].map(c => c.dataset.m);
+  machines.forEach(m => {
+    if (!existing.includes(m)) {
+      const btn = document.createElement('button');
+      btn.className = 'machine-chip'; btn.dataset.m = m; btn.textContent = m;
+      btn.onclick = () => filterMachine(btn, m);
+      list.appendChild(btn);
+    }
+  });
+  renderTrend(ev); renderRisk(sc); renderKeywords(stats.top_keywords); renderTable(ev);
+}
+
+// ════════════════════════════════════
+// Charts
+// ════════════════════════════════════
+function renderTrend(events) {
+  const buckets = {};
+  events.forEach(e => {
+    const ts = e.received_at || e.timestamp; if (!ts) return;
+    const key = ts.substring(0,16).replace('T',' ');
+    buckets[key] = (buckets[key]||0)+1;
+  });
+  const labels = Object.keys(buckets).sort().slice(-30);
+  const data   = labels.map(k => buckets[k]);
+  if (charts.trend) {
+    charts.trend.data.labels = labels; charts.trend.data.datasets[0].data = data;
+    charts.trend.update('none');
+  } else {
+    charts.trend = new Chart(document.getElementById('chartTrend'), {
+      type:'line',
+      data:{ labels, datasets:[{ label:'Events/phút', data, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,.12)', fill:true, tension:0.3, pointRadius:2 }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales:{ x:{ticks:{maxTicksLimit:6,font:{size:10}}}, y:{beginAtZero:true,ticks:{font:{size:10}}} } }
+    });
+  }
+}
+function renderRisk(counts) {
+  const labels = ['None','Low','Medium','High','Critical'].filter(k => counts[k]>0);
+  const data = labels.map(k=>counts[k]); const colors = labels.map(k=>SEV_COLOR[k]);
+  if (charts.risk) {
+    charts.risk.data.labels=labels; charts.risk.data.datasets[0].data=data;
+    charts.risk.data.datasets[0].backgroundColor=colors; charts.risk.update('none');
+  } else {
+    charts.risk = new Chart(document.getElementById('chartRisk'), {
+      type:'doughnut',
+      data:{ labels, datasets:[{data,backgroundColor:colors,borderWidth:1}] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{font:{size:11},padding:8}}} }
+    });
+  }
+}
+function renderKeywords(topKw) {
+  if (!topKw||!topKw.length) return;
+  const labels = topKw.slice(0,8).map(k=>k.keyword);
+  const data   = topKw.slice(0,8).map(k=>k.count);
+  if (charts.kw) {
+    charts.kw.data.labels=labels; charts.kw.data.datasets[0].data=data; charts.kw.update('none');
+  } else {
+    charts.kw = new Chart(document.getElementById('chartKw'), {
+      type:'bar',
+      data:{ labels, datasets:[{data,backgroundColor:'#818cf8',borderRadius:4}] },
+      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{ x:{beginAtZero:true,ticks:{font:{size:10}}}, y:{ticks:{font:{size:10}}} } }
+    });
+  }
+}
+
+// ════════════════════════════════════
+// Table
+// ════════════════════════════════════
+function renderTable(events) {
+  const enabledCols = COLUMN_DEFS.filter(c => c.enabled);
+  const thead = document.querySelector('table thead tr');
+  const tbody = document.getElementById('tableBody');
+  const sev   = e => severity(e.risk_score);
+  const fmt   = ts => ts ? ts.replace('T',' ').substring(0,19) : '—';
+  const kws   = arr => (arr||[]).map(k=>`<span class="kw-tag">${k}</span>`).join('')||'—';
+  
+  // Render headers dynamically
+  thead.innerHTML = enabledCols.map(col => `<th>${col.label}</th>`).join('');
+  
+  // Render table rows
+  tbody.innerHTML = events.slice(0,300).map(e => {
+    const cells = enabledCols.map(col => {
+      let content = '—';
+      switch(col.id) {
+        case 'machine_name': content = e.machine_name || '—'; break;
+        case 'timestamp': content = `<span style="white-space:nowrap;font-size:11px">${fmt(e.received_at || e.timestamp)}</span>`; break;
+        case 'severity': content = `<span class="pill sev-${sev(e).toLowerCase()}">${sev(e)}</span>`; break;
+        case 'action': content = `<span class="pill pill-${e.action}">${e.action}</span>`; break;
+        case 'risk_score': content = `<span style="font-weight:600;color:${SEV_COLOR[sev(e)]}">${e.risk_score}</span>`; break;
+        case 'user': content = e.user || '—'; break;
+        case 'file_name': content = `<span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.file_name}">${e.file_name || '—'}</span>`; break;
+        case 'window_title': content = `<span style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.window_title}">${e.window_title || '—'}</span>`; break;
+        case 'source': content = e.source || '—'; break;
+        case 'keywords': content = kws(e.keywords); break;
+        case 'process_name': content = e.process_name || '—'; break;
+      }
+      return `<td>${content}</td>`;
+    }).join('');
+    return `<tr onclick="openModal(${e.id})" style="cursor:pointer;">${cells}</tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════
+// Detail Modal
+// ════════════════════════════════════
+async function openModal(id) {
+  const modal = document.getElementById('detailModal');
+  const cont  = document.getElementById('detailContent');
+  modal.classList.add('show');
+  cont.innerHTML = '<p style="text-align:center">⏳ Đang tải...</p>';
+  try {
+    const resp  = await fetch(`/api/events/${id}`);
+    if (!resp.ok) throw new Error('Event not found');
+    const e     = await resp.json();
+    const sev   = severity(e.risk_score);
+    const fmt   = ts => ts ? ts.replace('T',' ').substring(0,19) : '—';
+    const kws   = arr => (arr||[]).map(k=>`<span class="kw-tag">${k}</span>`).join('')||'—';
+    
+    // Helper: safely parse JSON fields
+    const safeArray = (val) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === 'string') {
+        try { return JSON.parse(val); } catch(e) { return []; }
+      }
+      return [];
+    };
+    const safeObject = (val) => {
+      if (typeof val === 'object' && val !== null) return val;
+      if (typeof val === 'string') {
+        try { return JSON.parse(val); } catch(e) { return {}; }
+      }
+      return {};
+    };
+    
+    // Parse match details
+    const yaraMatches = safeArray(e.yara_rules_matched);
+    const behavioralMatches = safeArray(e.behavioral_rules_matched);
+    const riskBreakdown = safeObject(e.risk_score_breakdown);
+    
+    // Format YARA matches
+    const yaraHtml = (yaraMatches && yaraMatches.length > 0)
+      ? `<div style="background:#fff7ed;padding:12px;border-radius:6px;border-left:3px solid #f59e0b;">
+          <strong style="color:#92400e">🔍 YARA Matches (${e.yara_matches_count || 0})</strong><br>
+          ${yaraMatches.map(r => `
+            <div style="margin-top:8px;padding:8px;background:#fef3c7;border-radius:4px;">
+              <div><strong>${r.rule || 'Unknown'}</strong></div>
+              <div style="font-size:11px;color:#92400e;margin-top:4px">Patterns: ${(r.strings||[]).join(', ') || 'N/A'}</div>
+            </div>
+          `).join('')}
+        </div>`
+      : '';
+    
+    // Format Behavioral matches
+    const behavioralHtml = (behavioralMatches && behavioralMatches.length > 0)
+      ? `<div style="background:#f0fdf4;padding:12px;border-radius:6px;border-left:3px solid #22c55e;margin-top:12px;">
+          <strong style="color:#166534">🧠 Behavioral Matches (${e.behavioral_matches_count || 0})</strong><br>
+          ${behavioralMatches.map(r => `
+            <div style="margin-top:6px;padding:6px;background:#dcfce7;border-radius:4px;">
+              <div><strong>${r.rule || 'Unknown'}</strong> <span style="float:right;background:#22c55e;color:white;padding:2px 6px;border-radius:3px;font-size:10px">${(r.score||0).toFixed(2)}</span></div>
+              ${r.reason ? `<div style="font-size:11px;color:#166534;margin-top:3px">${r.reason}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>`
+      : '';
+    
+    // Format Risk Breakdown
+    const breakdownHtml = (Object.keys(riskBreakdown).length > 0)
+      ? `<div style="background:#f8f9fa;padding:12px;border-radius:6px;border-left:3px solid #3b82f6;margin-top:12px;">
+          <strong style="color:#1d4ed8">📊 Risk Score Breakdown</strong><br>
+          <table style="width:100%;margin-top:8px;font-size:12px;border-collapse:collapse;">
+            ${Object.entries(riskBreakdown).map(([key, val]) => `
+              <tr style="border-bottom:1px solid #e5e7eb;">
+                <td style="padding:6px">${key.replace(/_/g,' ')}</td>
+                <td style="text-align:right;padding:6px;font-weight:600;color:#1d4ed8">${(val||0).toFixed(2)}</td>
+              </tr>
+            `).join('')}
+          </table>
+        </div>`
+      : '';
+    
+    // Format Action Reason
+    const reasonHtml = e.action_reason
+      ? `<div style="background:#fef2f2;padding:12px;border-radius:6px;border-left:3px solid #ef4444;margin-top:12px;">
+          <strong style="color:#991b1b">ℹ️ Action Reason</strong><br>
+          <p style="margin:8px 0 0;font-size:12px;color:#7f1d1d">${e.action_reason}</p>
+        </div>`
+      : '';
+    
+    // Format Duration & Size
+    const metadataHtml = (e.check_duration_ms || e.content_size)
+      ? `<div style="background:#f0f4f8;padding:12px;border-radius:6px;margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px;">
+          ${e.check_duration_ms ? `<div><label style="color:#64748b">⏱️ Processing Time</label><p style="font-weight:600;color:#1d4ed8">${e.check_duration_ms}ms</p></div>` : ''}
+          ${e.content_size ? `<div><label style="color:#64748b">📦 Content Size</label><p style="font-weight:600;color:#1d4ed8">${(e.content_size / 1024).toFixed(1)}KB</p></div>` : ''}
+        </div>`
+      : '';
+    
+    cont.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;">🖥 Máy</label><p style="margin:4px 0 0;font-weight:600">${e.machine_name||'—'}</p></div>
+        <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;">⏰ Thời gian</label><p style="margin:4px 0 0;font-weight:600;white-space:nowrap">${fmt(e.received_at || e.timestamp)}</p></div>
+        <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;">⚠️ Severity</label><p style="margin:4px 0 0"><span class="pill sev-${sev.toLowerCase()}">${sev}</span></p></div>
+        <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;">🎯 Risk</label><p style="margin:4px 0 0;font-weight:600;color:${SEV_COLOR[sev]};font-size:18px">${e.risk_score}</p></div>
+        <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;">✋ Action</label><p style="margin:4px 0 0"><span class="pill pill-${e.action}">${e.action}</span></p></div>
+        <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;">👤 User</label><p style="margin:4px 0 0;font-weight:600">${e.user||'—'}</p></div>
+      </div>
+      
+      <div style="border-top:1px solid var(--border);padding-top:16px;display:flex;flex-direction:column;gap:12px;">
+        <div>
+          ${['📁 File path|file_path','🗂 Tên file|file_name','🪟 Window title|window_title','⚙️ Process|process_name','📍 Source|source'].map(s=>{
+            const [lbl,key]=s.split('|');
+            return `<div style="margin-bottom:12px;"><label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">${lbl}</label><p style="background:#f8fafc;padding:8px;border-radius:6px;word-break:break-all;font-family:monospace;font-size:12px;margin:0">${e[key]||'—'}</p></div>`;
+          }).join('')}
+          <div><label style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:4px">🔑 Keywords</label><p style="margin:0">${kws(e.keywords)}</p></div>
+        </div>
+      </div>
+      
+      <!-- Chi tiết Match Mới -->
+      ${yaraHtml}
+      ${behavioralHtml}
+      ${breakdownHtml}
+      ${reasonHtml}
+      ${metadataHtml}
+    `;
+  } catch(ex) {
+    cont.innerHTML = `<p style="color:var(--red)">❌ ${ex.message}</p>`;
+  }
+}
+function closeModal() { document.getElementById('detailModal').classList.remove('show'); }
+
+// ════════════════════════════════════
+// Column Picker
+// ════════════════════════════════════
+const COLUMN_DEFS = [
+  { id: 'machine_name', label: '🖥 Máy', enabled: true },
+  { id: 'timestamp', label: '⏰ Thời gian', enabled: true },
+  { id: 'severity', label: '⚠️ Severity', enabled: true },
+  { id: 'action', label: '✋ Action', enabled: true },
+  { id: 'risk_score', label: '🎯 Risk', enabled: true },
+  { id: 'user', label: '👤 User', enabled: true },
+  { id: 'file_name', label: '📄 File', enabled: true },
+  { id: 'window_title', label: '🪟 Window Title', enabled: false },
+  { id: 'source', label: '📍 Source', enabled: true },
+  { id: 'keywords', label: '🔑 Keywords', enabled: true },
+  { id: 'process_name', label: '⚙️ Process', enabled: true },
+];
+
+function loadColumnSettings() {
+  const saved = localStorage.getItem('columnSettings');
+  if (saved) {
+    try {
+      const settings = JSON.parse(saved);
+      COLUMN_DEFS.forEach(col => {
+        if (settings.hasOwnProperty(col.id)) col.enabled = settings[col.id];
+      });
+    } catch(e) { console.error('Failed to load column settings:', e); }
+  }
+}
+
+function saveColumnSettings() {
+  const settings = {};
+  COLUMN_DEFS.forEach(col => { settings[col.id] = col.enabled; });
+  localStorage.setItem('columnSettings', JSON.stringify(settings));
+  renderTable(allEvents);
+}
+
+function openColumnPickerModal() {
+  const modal = document.getElementById('columnPickerModal');
+  const container = document.getElementById('columnCheckboxes');
+  container.innerHTML = COLUMN_DEFS.map(col => `
+    <label style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:6px;cursor:pointer;hover:background:#f8fafc;">
+      <input type="checkbox" id="col_${col.id}" ${col.enabled ? 'checked' : ''} 
+        onchange="document.getElementById('col_${col.id}').checked ? COLUMN_DEFS.find(c=>c.id==='${col.id}').enabled=true : COLUMN_DEFS.find(c=>c.id==='${col.id}').enabled=false">
+      <span style="font-size:13px;color:var(--text);user-select:none;">${col.label}</span>
+    </label>
+  `).join('');
+  modal.classList.add('show');
+}
+
+function closeColumnPickerModal() {
+  saveColumnSettings();
+  document.getElementById('columnPickerModal').classList.remove('show');
+}
+
+function resetColumnsToDefault() {
+  COLUMN_DEFS.forEach(col => { col.enabled = true; });
+  localStorage.removeItem('columnSettings');
+  const modal = document.getElementById('columnPickerModal');
+  const container = document.getElementById('columnCheckboxes');
+  container.innerHTML = COLUMN_DEFS.map(col => `
+    <label style="display:flex;align-items:center;gap:8px;padding:8px;border-radius:6px;cursor:pointer;">
+      <input type="checkbox" id="col_${col.id}" checked 
+        onchange="document.getElementById('col_${col.id}').checked ? COLUMN_DEFS.find(c=>c.id==='${col.id}').enabled=true : COLUMN_DEFS.find(c=>c.id==='${col.id}').enabled=false">
+      <span style="font-size:13px;color:var(--text);user-select:none;">${col.label}</span>
+    </label>
+  `).join('');
+  saveColumnSettings();
+}
+
+// ════════════════════════════════════
+// Agent modals
+// ════════════════════════════════════
+function openAddAgentModal()  { document.getElementById('addAgentModal').classList.add('show'); }
+function closeAddAgentModal() {
+  document.getElementById('addAgentModal').classList.remove('show');
+  ['newAgentKey','newMachineName','newDisplayName'].forEach(id=>document.getElementById(id).value='');
+  const m=document.getElementById('agentMessage'); m.style.display='none';
+}
+function generateApiKey() {
+  let k='dlp-key-';
+  const c='abcdefghijklmnopqrstuvwxyz0123456789-';
+  for(let i=0;i<12;i++) k+=c[Math.floor(Math.random()*c.length)];
+  document.getElementById('newAgentKey').value=k;
+}
+async function saveNewAgent() {
+  const apiKey=document.getElementById('newAgentKey').value.trim();
+  const machineName=document.getElementById('newMachineName').value.trim();
+  const displayName=document.getElementById('newDisplayName').value.trim()||machineName;
+  const msgDiv=document.getElementById('agentMessage');
+  if (!apiKey||!machineName) {
+    msgDiv.style.display='block'; msgDiv.style.background='#fef2f2'; msgDiv.style.color='#991b1b';
+    msgDiv.textContent='❌ Vui lòng nhập API Key và Machine Name'; return;
+  }
+  if (!ensureAdminKey()) return;
+  try {
+    const r = await fetch('/api/agents',{ method:'POST', headers:{'Content-Type':'application/json','x-admin-key':adminKey},
+      body:JSON.stringify({api_key:apiKey,machine_name:machineName,display_name:displayName}) });
+    if (r.ok) {
+      msgDiv.style.display='block'; msgDiv.style.background='#f0fdf4'; msgDiv.style.color='#166534';
+      msgDiv.textContent='✅ Thêm agent thành công!';
+      setTimeout(()=>{ fetchData(); closeAddAgentModal(); },1500);
+    } else if (r.status===409) { msgDiv.style.display='block'; msgDiv.style.background='#fef2f2'; msgDiv.style.color='#991b1b'; msgDiv.textContent='❌ API Key đã tồn tại'; }
+    else if (r.status===401) { msgDiv.style.display='block'; msgDiv.style.background='#fef2f2'; msgDiv.style.color='#991b1b'; msgDiv.textContent='❌ Admin Key không hợp lệ'; adminKey=''; sessionStorage.removeItem('adminKey'); }
+    else { msgDiv.style.display='block'; msgDiv.style.background='#fef2f2'; msgDiv.style.color='#991b1b'; msgDiv.textContent='❌ Lỗi thêm agent'; }
+  } catch(e) { msgDiv.style.display='block'; msgDiv.style.background='#fef2f2'; msgDiv.style.color='#991b1b'; msgDiv.textContent='❌ '+e.message; }
+}
+async function deleteAgent(apiKey) {
+  if (!confirm(`Xóa agent '${apiKey}'?`)) return;
+  if (!ensureAdminKey()) return;
+  const r = await fetch(`/api/agents/${apiKey}`,{method:'DELETE',headers:{'x-admin-key':adminKey}});
+  if (r.ok) { fetchData(); if(document.getElementById('endpointManagementModal').classList.contains('show')) refreshEndpointList(); }
+  else if (r.status===401) { alert('❌ Admin Key không hợp lệ'); adminKey=''; sessionStorage.removeItem('adminKey'); }
+  else alert('❌ Lỗi xóa agent');
+}
+function openEndpointManagement()  { document.getElementById('endpointManagementModal').classList.add('show'); refreshEndpointList(); }
+function closeEndpointManagement() { document.getElementById('endpointManagementModal').classList.remove('show'); }
+async function refreshEndpointList() {
+  try {
+    const agents = await (await fetch('/api/agents')).json();
+    const tbody  = document.getElementById('endpointTableBody');
+    if (!agents||!agents.length) { tbody.innerHTML='<tr><td colspan="7" style="padding:20px;text-align:center;color:#94a3b8">Không có endpoints</td></tr>'; return; }
+    tbody.innerHTML = agents.map(a=>{
+      const badge = a.is_online
+        ? '<span style="background:#f0fdf4;color:#166534;padding:3px 8px;border-radius:4px;font-weight:600;font-size:11px">🟢 Online</span>'
+        : '<span style="background:#fef2f2;color:#991b1b;padding:3px 8px;border-radius:4px;font-weight:600;font-size:11px">⚫ Offline</span>';
+      const last = a.last_connection ? new Date(a.last_connection).toLocaleString('vi-VN') : '<span style="color:#94a3b8">Chưa kết nối</span>';
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:12px">${badge}</td>
+        <td style="padding:12px;font-weight:600">${a.display_name}</td>
+        <td style="padding:12px;color:var(--muted)">${a.machine_name}</td>
+        <td style="padding:12px;font-family:monospace;font-size:11px">
+          <code style="background:#f8fafc;padding:2px 6px;border-radius:3px;color:#3730a3">${a.api_key}</code>
+          <button onclick="navigator.clipboard.writeText('${a.api_key}')" style="background:none;border:none;cursor:pointer;margin-left:4px" title="Copy">📋</button>
+        </td>
+        <td style="padding:12px;color:var(--muted);font-size:11px">${last}</td>
+        <td style="padding:12px;color:var(--muted);font-size:11px">${new Date(a.created_at).toLocaleDateString('vi-VN')}</td>
+        <td style="padding:12px"><button onclick="deleteAgent('${a.api_key}')" style="padding:4px 8px;background:#991b1b;color:#fef2f2;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:600">🗑 Xóa</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+// ════════════════════════════════════
+// RULES CONFIG MODAL
+// ════════════════════════════════════
+let _rcmConfig = null;   // local copy of current config
+
+function openRulesConfigModal() {
+  document.getElementById('rulesConfigModal').classList.add('show');
+  rcmLoadAll();
+}
+function closeRulesConfigModal() {
+  document.getElementById('rulesConfigModal').classList.remove('show');
+}
+
+function rcmTab(btn, panelId) {
+  document.querySelectorAll('.rcm-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.rcm-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+  if (panelId === 'rcm-stats') rcmRenderStats();
+}
+
+// ── Toast ──────────────────────────────────────────────
+function rcmToast(msg, type='success') {
+  const el = document.getElementById('rcmToast');
+  el.textContent = msg; el.className = `rcm-toast show ${type}`;
+  if (type !== 'loading') setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// ── Load all config ───────────────────────────────────
+async function rcmLoadAll() {
+  rcmToast('Đang tải cấu hình…', 'loading');
+  try {
+    const resp = await fetch(`${API_RULES}/config`, {
+      headers: { 'X-Admin-Key': adminKey || '' }
+    });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    _rcmConfig = await resp.json();
+    rcmRenderKeywords();
+    rcmRenderDomains();
+    rcmRenderApps();
+    rcmRenderThresholds();
+    rcmRenderStats();
+    rcmToast('✓ Đã tải cấu hình', 'success');
+  } catch(e) {
+    // Fallback: load từng endpoint riêng
+    await Promise.allSettled([rcmRenderKeywords(), rcmRenderDomains(), rcmRenderApps()]);
+    rcmToast('⚠ Một số dữ liệu không tải được: ' + e.message, 'error');
+  }
+}
+
+// ── Helper: render tag cloud ───────────────────────────
+function rcmRenderTags(containerId, items, deleteCallback) {
+  const el = document.getElementById(containerId);
+  if (!items || !items.length) {
+    el.innerHTML = '<span class="rcm-empty">Chưa có mục nào</span>';
+    return;
+  }
+  el.innerHTML = items.map(item => `
+    <span class="rcm-tag">
+      ${item}
+      <button class="rcm-tag-del" onclick="${deleteCallback}('${item.replace(/'/g,"\\'")}')">×</button>
+    </span>`).join('');
+}
+
+// ── Keywords ───────────────────────────────────────────
+async function rcmRenderKeywords() {
+  try {
+    const data = await (await fetch(`${API_RULES}/keywords`, { headers:{'X-Admin-Key':adminKey||''} })).json();
+    rcmRenderTags('rcmKwTags', data.keywords, 'rcmDelKeyword');
+  } catch { document.getElementById('rcmKwTags').innerHTML = '<span class="rcm-empty">Lỗi tải</span>'; }
+}
+async function rcmAddKeyword() {
+  const val = document.getElementById('rcmKwInput').value.trim().toLowerCase();
+  if (!val) return;
+  if (!ensureAdminKey()) return;
+  rcmToast('Đang thêm…', 'loading');
+  try {
+    const r = await fetch(`${API_RULES}/keywords`, {
+      method:'POST', headers:{'X-Admin-Key':adminKey,'Content-Type':'application/json'},
+      body: JSON.stringify({ keyword: val })
+    });
+    if (!r.ok) throw new Error((await r.json()).detail || r.status);
+    document.getElementById('rcmKwInput').value = '';
+    rcmToast(`✓ Đã thêm keyword "${val}"`, 'success');
+    rcmRenderKeywords();
+  } catch(e) { rcmToast('❌ ' + e.message, 'error'); }
+}
+async function rcmDelKeyword(kw) {
+  if (!confirm(`Xóa keyword "${kw}"?`)) return;
+  if (!ensureAdminKey()) return;
+  try {
+    const r = await fetch(`${API_RULES}/keywords/${encodeURIComponent(kw)}`, {
+      method:'DELETE', headers:{'X-Admin-Key':adminKey}
+    });
+    if (!r.ok) throw new Error(r.status);
+    rcmToast(`✓ Đã xóa "${kw}"`, 'success');
+    rcmRenderKeywords();
+  } catch(e) { rcmToast('❌ ' + e.message, 'error'); }
+}
+
+// ── Domains ────────────────────────────────────────────
+async function rcmRenderDomains() {
+  try {
+    const data = await (await fetch(`${API_RULES}/domains`, { headers:{'X-Admin-Key':adminKey||''} })).json();
+    rcmRenderTags('rcmDomTags', data.domains, 'rcmDelDomain');
+  } catch { document.getElementById('rcmDomTags').innerHTML = '<span class="rcm-empty">Lỗi tải</span>'; }
+}
+async function rcmAddDomain() {
+  const val = document.getElementById('rcmDomInput').value.trim().toLowerCase();
+  if (!val) return;
+  if (!ensureAdminKey()) return;
+  rcmToast('Đang thêm…', 'loading');
+  try {
+    const r = await fetch(`${API_RULES}/domains`, {
+      method:'POST', headers:{'X-Admin-Key':adminKey,'Content-Type':'application/json'},
+      body: JSON.stringify({ domain: val })
+    });
+    if (!r.ok) throw new Error((await r.json()).detail || r.status);
+    document.getElementById('rcmDomInput').value = '';
+    rcmToast(`✓ Đã thêm domain "${val}"`, 'success');
+    rcmRenderDomains();
+  } catch(e) { rcmToast('❌ ' + e.message, 'error'); }
+}
+async function rcmDelDomain(domain) {
+  if (!confirm(`Xóa domain "${domain}"?`)) return;
+  if (!ensureAdminKey()) return;
+  try {
+    const r = await fetch(`${API_RULES}/domains/${encodeURIComponent(domain)}`, {
+      method:'DELETE', headers:{'X-Admin-Key':adminKey}
+    });
+    if (!r.ok) throw new Error(r.status);
+    rcmToast(`✓ Đã xóa "${domain}"`, 'success');
+    rcmRenderDomains();
+  } catch(e) { rcmToast('❌ ' + e.message, 'error'); }
+}
+
+// ── Apps ───────────────────────────────────────────────
+async function rcmRenderApps() {
+  try {
+    const data = await (await fetch(`${API_RULES}/apps?app_type=all`, { headers:{'X-Admin-Key':adminKey||''} })).json();
+    rcmRenderTags('rcmBrowserTags', data.data.browser_apps,   'rcmDelBrowser');
+    rcmRenderTags('rcmMsgTags',     data.data.messaging_apps, 'rcmDelMsg');
+  } catch {
+    ['rcmBrowserTags','rcmMsgTags'].forEach(id => document.getElementById(id).innerHTML = '<span class="rcm-empty">Lỗi tải</span>');
+  }
+}
+async function rcmAddApp() {
+  const val  = document.getElementById('rcmAppInput').value.trim().toLowerCase();
+  const type = document.getElementById('rcmAppType').value;
+  if (!val) return;
+  if (!ensureAdminKey()) return;
+  rcmToast('Đang thêm…', 'loading');
+  try {
+    const r = await fetch(`${API_RULES}/apps`, {
+      method:'POST', headers:{'X-Admin-Key':adminKey,'Content-Type':'application/json'},
+      body: JSON.stringify({ app_name: val, app_type: type })
+    });
+    if (!r.ok) throw new Error((await r.json()).detail || r.status);
+    document.getElementById('rcmAppInput').value = '';
+    rcmToast(`✓ Đã thêm "${val}" vào ${type}_apps`, 'success');
+    rcmRenderApps();
+  } catch(e) { rcmToast('❌ ' + e.message, 'error'); }
+}
+async function rcmDelBrowser(app) { await _rcmDelApp(app, 'browser'); }
+async function rcmDelMsg(app)     { await _rcmDelApp(app, 'messaging'); }
+async function _rcmDelApp(app, type) {
+  if (!confirm(`Xóa "${app}" khỏi ${type}_apps?`)) return;
+  if (!ensureAdminKey()) return;
+  try {
+    const r = await fetch(`${API_RULES}/apps/${encodeURIComponent(app)}?app_type=${type}`, {
+      method:'DELETE', headers:{'X-Admin-Key':adminKey}
+    });
+    if (!r.ok) throw new Error(r.status);
+    rcmToast(`✓ Đã xóa "${app}"`, 'success');
+    rcmRenderApps();
+  } catch(e) { rcmToast('❌ ' + e.message, 'error'); }
+}
+
+// ── Thresholds ─────────────────────────────────────────
+const THRESHOLD_META = [
+  { key:'entropy_threshold',          label:'Entropy tối thiểu',          step:'0.1', min:'0',  max:'8'    },
+  { key:'text_len_threshold',         label:'Text length tối thiểu (chars)',step:'50', min:'0',  max:'10000'},
+  { key:'working_hours_start',        label:'Giờ làm việc (bắt đầu)',     step:'1',  min:'0',  max:'23'   },
+  { key:'working_hours_end',          label:'Giờ làm việc (kết thúc)',    step:'1',  min:'0',  max:'23'   },
+  { key:'file_count_threshold',       label:'Số file bulk copy tối thiểu', step:'5',  min:'1',  max:'500'  },
+  { key:'content_len_threshold',      label:'Bulk paste size (chars)',     step:'500',min:'0',  max:'100000'},
+  { key:'max_operations_per_minute',  label:'Clipboard ops/phút tối đa',  step:'1',  min:'1',  max:'100'  },
+  { key:'min_bytes_threshold',        label:'Network upload tối thiểu (bytes)', step:'1024',min:'0',max:'10485760'},
+];
+
+function rcmRenderThresholds() {
+  const rule = _rcmConfig?.rules?.Clipboard_Paste_To_External_App?.config || {};
+  const bulkRule = _rcmConfig?.rules?.Bulk_File_Copy?.config || {};
+  const netRule  = _rcmConfig?.rules?.Network_Upload?.config || {};
+  const merged   = { ...rule, ...bulkRule, ...netRule };
+
+  const container = document.getElementById('rcmThresholdFields');
+  container.innerHTML = THRESHOLD_META.map(m => `
+    <div>
+      <label style="display:block;font-size:12px;color:var(--m-muted);margin-bottom:6px">${m.label}</label>
+      <input id="thr_${m.key}" type="number" class="rcm-input" style="width:100%"
+        step="${m.step}" min="${m.min}" max="${m.max}"
+        value="${merged[m.key] ?? ''}">
+    </div>`).join('');
+}
+
+async function rcmSaveThresholds() {
+  if (!ensureAdminKey()) return;
+  const updates = {};
+  THRESHOLD_META.forEach(m => {
+    const el = document.getElementById(`thr_${m.key}`);
+    if (el && el.value !== '') updates[m.key] = parseFloat(el.value);
+  });
+  rcmToast('Đang lưu…', 'loading');
+  try {
+    const r = await fetch(`${API_RULES}/thresholds`, {
+      method:'PATCH', headers:{'X-Admin-Key':adminKey,'Content-Type':'application/json'},
+      body: JSON.stringify(updates)
+    });
+    if (!r.ok) throw new Error((await r.json()).detail || r.status);
+    rcmToast('✓ Đã lưu thresholds', 'success');
+    rcmLoadAll();
+  } catch(e) { rcmToast('❌ ' + e.message, 'error'); }
+}
+
+// ── Stats ──────────────────────────────────────────────
+function rcmRenderStats() {
+  if (!_rcmConfig) return;
+  const r   = _rcmConfig.rules || {};
+  const cp  = r.Clipboard_Paste_To_External_App?.config || {};
+  const usb = r.USB_Data_Exfiltration?.config || {};
+  const net = r.Network_Upload?.config || {};
+  const bulk= r.Bulk_File_Copy?.config || {};
+
+  const statDefs = [
+    { val: (cp.sensitive_title_keywords||[]).length,  label:'Keywords' },
+    { val: (cp.sensitive_domains||[]).length,          label:'Domains' },
+    { val: (cp.browser_apps||[]).length,               label:'Browser Apps' },
+    { val: (cp.messaging_apps||[]).length,             label:'Messaging Apps' },
+    { val: (usb.removable_drive_letters||[]).length,   label:'Removable Drives' },
+    { val: Object.keys(r).filter(k=>r[k].enabled!==false).length, label:'Rules Enabled' },
+  ];
+
+  document.getElementById('rcmStatsGrid').innerHTML = statDefs.map(s => `
+    <div class="rcm-stat">
+      <div class="rcm-stat-val">${s.val}</div>
+      <div class="rcm-stat-label">${s.label}</div>
+    </div>`).join('');
+
+  document.getElementById('rcmVersion').textContent   = _rcmConfig.version ?? '—';
+  document.getElementById('rcmUpdatedAt').textContent = _rcmConfig.updated_at
+    ? new Date(_rcmConfig.updated_at).toLocaleString('vi-VN') : '—';
+}
+
+// ════════════════════════════════════
+// Click-outside to close modals
+// ════════════════════════════════════
+document.addEventListener('click', e => {
+  [
+    ['detailModal',             closeModal],
+    ['addAgentModal',           closeAddAgentModal],
+    ['columnPickerModal',       closeColumnPickerModal],
+    ['endpointManagementModal', closeEndpointManagement],
+    ['rulesConfigModal',        closeRulesConfigModal],
+  ].forEach(([id, fn]) => {
+    if (e.target === document.getElementById(id)) fn();
+  });
+});
+
+</script>
+</body>
+</html>

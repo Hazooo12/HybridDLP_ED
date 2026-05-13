@@ -1,0 +1,823 @@
+Được. Dưới đây là **định hướng phát triển chi tiết, cụ thể và cẩn thận** để bạn nâng cấp project DLP theo hướng **CVSS-style risk scoring**, nhưng vẫn **phù hợp bản chất DLP**, không bê nguyên mô hình vulnerability scoring vào một cách máy móc.
+
+Mình viết theo kiểu bạn có thể dùng luôn để:
+
+* chỉnh kiến trúc hệ thống,
+* viết báo cáo đồ án,
+* giải thích với thầy,
+* và triển khai dần trong code.
+
+Project hiện tại của bạn đã có nền rất tốt để đi theo hướng này: kiến trúc Agent nhẹ + Worker nặng, pipeline scan theo sự kiện, YARA, OCR có điều kiện, hash cache SHA-256, queue SQLite, anomaly/UEBA, behavioral rules, risk scoring, panic mode. Nghĩa là bạn **không cần làm lại từ đầu**, mà chủ yếu là **tái cấu trúc tầng chấm điểm rủi ro** và **chuẩn hóa logic ra quyết định**. 
+
+Đồng thời, slide Cisco bạn gửi cho thấy cách tiếp cận rất đáng dùng cho đồ án: tách tư duy thành **profiling/baseline**, **CVSS metric groups**, **risk management lifecycle**, và liên hệ với ISMS/NIST. Đây chính là khung lý thuyết tốt để bạn biện minh hướng phát triển. 
+
+---
+
+# 1. Mục tiêu phát triển mới
+
+## 1.1. Mục tiêu tổng quát
+
+Phát triển DLP từ một hệ thống:
+
+* phát hiện dữ liệu nhạy cảm,
+* phát hiện bất thường,
+* rồi cộng điểm rủi ro khá tuyến tính,
+
+thành một hệ thống:
+
+* **đánh giá rủi ro theo nhiều lớp giống tư duy CVSS**,
+* có **yếu tố thay đổi theo thời gian và theo ngữ cảnh**,
+* có thể **giải thích rõ vì sao một sự kiện bị chấm High/Critical**,
+* và quan trọng nhất là **ra quyết định phản ứng phù hợp** chứ không chỉ “cho điểm”.
+
+## 1.2. Mục tiêu cụ thể
+
+Bạn nên đặt 5 mục tiêu cụ thể:
+
+### M1. Chuẩn hóa risk model thành 3 lớp
+
+Lấy cảm hứng từ CVSS:
+
+* Base
+* Temporal/Threat
+* Environmental
+
+để áp vào DLP event scoring. 
+
+### M2. Bổ sung “Exfiltration Maturity”
+
+Đây là phần tương ứng với **Exploit Maturity** mà thầy đang gợi ý.
+Nhưng thay vì chấm “mức trưởng thành của khai thác lỗ hổng”, bạn chấm:
+
+* **mức trưởng thành của hành vi thất thoát dữ liệu**.
+
+### M3. Tách rõ “dữ liệu nhạy cảm” và “nguy cơ rò rỉ thực sự”
+
+Một file có dữ liệu nhạy cảm chưa chắc là sự cố nghiêm trọng.
+Ví dụ:
+
+* HR mở file lương trong giờ hành chính: nhạy cảm nhưng hợp lệ.
+* Nhân viên nén file lương, đặt mật khẩu rồi upload ra ngoài: nhạy cảm + hành vi exfil trưởng thành cao.
+
+### M4. Gắn điểm số với hành động xử lý
+
+Điểm số phải dẫn tới:
+
+* log,
+* alert,
+* justification,
+* block,
+* quarantine,
+* incident escalation.
+
+### M5. Có thể giải thích được
+
+Mỗi sự kiện nên trả ra:
+
+* BaseScore
+* Exfiltration Maturity
+* EnvironmentalScore
+* FinalRisk
+* RecommendedAction
+
+để dashboard và báo cáo dễ đọc.
+
+---
+
+# 2. Quan điểm thiết kế cốt lõi
+
+Có 4 nguyên tắc bạn nên giữ rất chặt.
+
+## 2.1. Không áp CVSS nguyên xi
+
+CVSS dùng cho **vulnerability severity**, còn bạn đang xử lý **DLP events**.
+Nên bạn chỉ **mượn cấu trúc tư duy**, không mượn nguyên công thức.
+
+## 2.2. DLP cần chấm “event risk”, không phải “asset risk” đơn thuần
+
+Điểm rủi ro của DLP phải phụ thuộc vào:
+
+* dữ liệu gì,
+* user nào,
+* hành vi gì,
+* chuyển đi đâu,
+* có dấu hiệu né tránh không,
+* có bất thường so với baseline không.
+
+## 2.3. Maturity phải là lớp điều chỉnh, không phải thay thế BaseScore
+
+Yếu tố giống CVSS Exploit Maturity chỉ nên làm nhiệm vụ:
+
+* **điều chỉnh độ ưu tiên thực tế**,
+* không được xóa vai trò của content sensitivity.
+
+## 2.4. Ưu tiên giảm false positive
+
+Vì DLP rất dễ báo động giả, nên:
+
+* không đẩy Unknown lên worst-case quá mạnh,
+* không block chỉ vì một tín hiệu đơn lẻ,
+* phải có cơ chế chain logic và context logic.
+
+---
+
+# 3. Mô hình scoring mới nên thiết kế thế nào
+
+Mình đề xuất model gồm 4 thành phần.
+
+## 3.1. Thành phần 1: Base Score
+
+Đây là **mức rủi ro nội tại** của sự kiện, tương tự tư duy Base Metric.
+
+Base Score phải phản ánh:
+
+* dữ liệu có nhạy cảm không,
+* mức nghiêm trọng của loại dữ liệu,
+* quyền hạn user,
+* hành vi quan sát được có bất thường không.
+
+### 3.1.1. Các nhóm điểm trong Base Score
+
+#### a) Content Sensitivity
+
+Điểm này đến từ:
+
+* YARA rules,
+* regex,
+* OCR nếu có,
+* classification rules.
+
+Ví dụ:
+
+* email cá nhân: thấp
+* CCCD / số thẻ / payroll / contract: cao
+* tài liệu nội bộ đánh dấu confidential: rất cao
+
+#### b) Data Criticality
+
+Đây là mức quan trọng của chính tài sản dữ liệu:
+
+* tài liệu HR
+* tài chính
+* source code
+* dữ liệu khách hàng
+* báo giá chưa công bố
+
+Điểm này khác với Content Sensitivity ở chỗ:
+
+* ContentSensitivity nhìn vào “nội dung phát hiện được”
+* DataCriticality nhìn vào “giá trị kinh doanh của loại dữ liệu”
+
+#### c) Behavior Anomaly
+
+Điểm này đến từ:
+
+* behavioral rules
+* anomaly detection
+* UEBA / Isolation Forest nếu có
+
+Ví dụ:
+
+* user chưa từng truy cập thư mục đó
+* đọc hàng loạt file ngoài giờ
+* đột ngột sao chép lượng lớn dữ liệu
+
+#### d) Confidence Score
+
+Cần có để tránh case OCR hay regex yếu mà vẫn đẩy điểm cao.
+Nếu detection confidence thấp thì Base Score nên bị hãm lại.
+
+### 3.1.2. Công thức gợi ý
+
+Bạn có thể dùng công thức đầu tiên như sau:
+
+```text
+BaseScore =
+0.35 * ContentSensitivity +
+0.25 * DataCriticality +
+0.25 * BehaviorAnomaly +
+0.15 * Confidence
+```
+
+Có thể scale từng thành phần về 0–100.
+
+---
+
+## 3.2. Thành phần 2: Exfiltration Maturity
+
+Đây là phần trung tâm của hướng phát triển.
+
+Nó là phiên bản DLP-adapted của tư duy **Exploit Maturity** trong CVSS.
+Slide Cisco chỉ ra CVSS có nhóm metric thay đổi theo thời gian và hoàn cảnh, rất phù hợp để bạn chuyển hóa thành lớp Threat/Temporal cho DLP. 
+
+### 3.2.1. Định nghĩa
+
+Exfiltration Maturity là:
+
+> mức trưởng thành của hành vi thất thoát dữ liệu trong thực tế, từ giai đoạn sơ khai tới nỗ lực rõ ràng và đang diễn ra.
+
+### 3.2.2. Các mức đề xuất
+
+#### EM:U — Preliminary / Low Maturity
+
+Chỉ có dấu hiệu ban đầu, chưa đủ mạnh để xem là exfil attempt thực thụ.
+
+Ví dụ:
+
+* mở file nhạy cảm
+* copy nội bộ trong cùng máy
+* đọc file ngoài giờ nhưng không có hành vi outbound
+* 1 tín hiệu lẻ từ clipboard
+
+#### EM:P — Suspicious Attempt
+
+Đã có dấu hiệu thử exfil hoặc chuẩn bị exfil.
+
+Ví dụ:
+
+* copy file nhạy cảm sang USB
+* nén file nhạy cảm
+* đổi tên extension
+* dùng process đáng ngờ
+* upload bị chặn
+* clipboard chứa dữ liệu nhạy cảm lặp lại nhiều lần
+
+#### EM:A — Active Exfiltration
+
+Đã có bằng chứng mạnh cho thấy hành vi thất thoát đang diễn ra.
+
+Ví dụ:
+
+* upload ra ngoài qua browser/network/native messaging
+* gửi email ra domain ngoài
+* copy hàng loạt file nhạy cảm sang USB
+* archive có mật khẩu rồi chuyển ra ngoài
+* nhiều bước attack chain diễn ra gần nhau
+* anomaly score rất cao
+
+#### EM:X — Unknown
+
+Thiếu telemetry hoặc sensor chưa quan sát đủ.
+
+Ví dụ:
+
+* network sensor tắt
+* chỉ thấy file zip xuất hiện nhưng không thấy đích đến
+* process log thiếu
+
+### 3.2.3. Vì sao cần mức X
+
+Vì thực tế hệ thống endpoint của bạn có thể:
+
+* bật/tắt sensor theo cấu hình,
+* chạy ở chế độ panic mode,
+* hoặc thiếu log ở vài loại kênh. 
+
+Mức X giúp bạn trung thực hơn khi giải thích hệ thống.
+
+### 3.2.4. Cách dùng EM
+
+EM không nên là “điểm riêng cộng trực tiếp quá mạnh”, mà nên là:
+
+* **factor điều chỉnh**
+  hoặc
+* **một score riêng có trần**
+
+Gợi ý factor:
+
+* U = 0.85
+* P = 1.00
+* A = 1.25
+* X = 0.95
+
+---
+
+## 3.3. Thành phần 3: Environmental Score
+
+Đây là lớp môi trường, rất hợp với logic CVSS Environmental.
+
+### 3.3.1. Mục đích
+
+Cùng một event nhưng trong môi trường khác nhau phải có mức rủi ro khác nhau.
+
+Ví dụ:
+
+* nhân viên HR mở bảng lương: bình thường
+* nhân viên sales mở bảng lương: đáng ngờ hơn
+* nhân viên sắp nghỉ việc copy payroll ra USB: rủi ro cao hơn nữa
+
+### 3.3.2. Các yếu tố nên đưa vào
+
+#### a) User Context
+
+* role user
+* department
+* privilege level
+* có thuộc nhóm privileged accounts không
+
+#### b) Time Context
+
+* ngoài giờ hành chính
+* cuối tuần
+* đêm muộn
+* sát thời điểm nghỉ việc / offboarding
+
+#### c) Asset Context
+
+* máy thuộc phòng ban nào
+* máy quản lý tài sản quan trọng
+* endpoint có dữ liệu crown-jewel
+
+#### d) Destination Context
+
+* nội bộ
+* removable media
+* external domain
+* cloud storage
+* email ngoài tổ chức
+
+### 3.3.3. Công thức gợi ý
+
+```text
+EnvironmentalScore =
+0.30 * UserContext +
+0.20 * TimeContext +
+0.25 * AssetContext +
+0.25 * DestinationContext
+```
+
+---
+
+## 3.4. Thành phần 4: Attack Chain Bonus
+
+Đây không có trong CVSS theo dạng trực tiếp, nhưng rất cần cho DLP event correlation.
+
+### 3.4.1. Mục tiêu
+
+Nhận ra chuỗi hành vi thay vì nhìn từng event đơn lẻ.
+
+Ví dụ chuỗi:
+
+* mở file nhạy cảm
+* nén
+* gắn USB
+* copy
+* upload
+
+Nếu các bước này diễn ra trong 5–10 phút, phải cộng điểm rõ rệt.
+
+### 3.4.2. Gợi ý
+
+AttackChainBonus = 0–20 điểm
+
+Bạn có thể cộng theo pattern:
+
+* open sensitive file + archive = +5
+* archive + password protect = +5
+* archive + USB copy = +5
+* archive + external upload = +10
+* multiple channels within 10 min = +10
+
+---
+
+# 4. Công thức final nên dùng
+
+Mình đề xuất công thức dễ giải thích, dễ code, dễ viết báo cáo:
+
+```text
+FinalRisk = min(100, BaseScore * EM_Factor + EnvironmentalScore * 0.3 + AttackChainBonus)
+```
+
+Hoặc nếu bạn muốn cân đối hơn:
+
+```text
+FinalRisk =
+0.60 * BaseScore +
+0.25 * MaturityScore +
+0.15 * EnvironmentalScore +
+AttackChainBonus
+```
+
+Trong đó:
+
+* `MaturityScore` map từ U/P/A/X thành số:
+
+  * U = 20
+  * P = 50
+  * A = 85
+  * X = 35
+
+Nếu làm đồ án, mình khuyên dùng cách 2 vì:
+
+* trực quan hơn,
+* dễ so sánh trong bảng,
+* dễ giải thích với giảng viên.
+
+---
+
+# 5. Cách xác định Exfiltration Maturity thật chi tiết
+
+Đây là phần quan trọng nhất.
+
+## 5.1. Dùng 5 nhóm tín hiệu
+
+### Nhóm 1: Exfiltration Channel
+
+Xác định dữ liệu có đang đi ra đâu không.
+
+Điểm gợi ý:
+
+* copy nội bộ: 0
+* clipboard: 10
+* print: 15
+* USB: 20
+* browser upload: 30
+* external email: 30
+* network upload/cloud sync: 35
+
+Project của bạn đã có sensor file, usb, clipboard, process, network, browser upload nên nhóm này hoàn toàn phù hợp để tận dụng. 
+
+### Nhóm 2: Concealment / Evasion
+
+Dấu hiệu né tránh.
+
+Điểm gợi ý:
+
+* rename extension: +10
+* archive: +10
+* password-protected archive: +20
+* split files: +15
+* encode/base64/compress nhiều lớp: +15
+
+### Nhóm 3: Volume and Repetition
+
+* số file
+* tổng dung lượng
+* số lần lặp lại
+* tốc độ thực hiện
+
+Điểm gợi ý:
+
+* > 5 file nhạy cảm: +10
+* > 20 file: +20
+* > 100MB: +15
+* lặp >3 lần trong 10 phút: +15
+
+### Nhóm 4: Destination and Direction
+
+* internal share
+* USB removable
+* personal cloud
+* public internet
+* external org
+
+Điểm gợi ý:
+
+* internal: +0
+* removable media: +10
+* unknown external: +20
+* confirmed external domain/cloud: +25
+
+### Nhóm 5: Anomaly / Baseline Deviation
+
+Slide Cisco nhấn mạnh profiling và anomaly detection phải dựa trên baseline hành vi. Đây là điểm bạn nên tận dụng rất mạnh. 
+
+Điểm gợi ý:
+
+* anomaly low: +0
+* anomaly medium: +10
+* anomaly high: +20
+
+## 5.2. Tính Maturity Score
+
+```text
+MaturityScore =
+ChannelScore +
+ConcealmentScore +
+VolumeScore +
+DestinationScore +
+AnomalyScore
+```
+
+## 5.3. Map ra mức
+
+* 0–24 => U
+* 25–54 => P
+* 55+ => A
+* thiếu telemetry => X
+
+Đây là phiên bản đầu tiên đủ ổn để implement.
+
+---
+
+# 6. Quy hoạch code trong hệ thống hiện tại
+
+Bạn đang có Worker L3 là nơi đọc queue, hash, fast scan, deep analysis, risk scoring. Chỗ này là vị trí đúng nhất để cắm logic mới. 
+
+## 6.1. Tách module mới
+
+Nên tạo:
+
+```text
+worker/core/base_scoring.py
+worker/core/exfiltration_maturity.py
+worker/core/environmental_scoring.py
+worker/core/attack_chain.py
+worker/core/final_risk_fusion.py
+worker/core/policy_decision.py
+```
+
+## 6.2. Luồng xử lý mới
+
+```text
+event
+→ normalization
+→ file stability
+→ hash
+→ cache lookup
+→ fast scan
+→ deep analysis
+→ base scoring
+→ exfiltration maturity scoring
+→ environmental scoring
+→ attack chain correlation
+→ final risk fusion
+→ action decision
+→ alert / log / block
+```
+
+## 6.3. Cấu trúc output chuẩn
+
+Mỗi event sau khi xử lý nên trả về JSON như sau:
+
+```json
+{
+  "event_id": "evt_123",
+  "base_score": 68,
+  "content_sensitivity": 80,
+  "data_criticality": 70,
+  "behavior_anomaly": 55,
+  "confidence": 60,
+  "exfiltration_maturity": "P",
+  "maturity_score": 47,
+  "environmental_score": 35,
+  "attack_chain_bonus": 10,
+  "final_risk": 73,
+  "recommended_action": "alert_and_justify",
+  "reason_codes": [
+    "sensitive_data_detected",
+    "usb_copy_detected",
+    "archive_detected",
+    "outside_business_hours"
+  ]
+}
+```
+
+Cái này rất quan trọng vì:
+
+* dễ debug,
+* dễ đưa lên dashboard,
+* dễ giải thích khi demo.
+
+---
+
+# 7. Chính sách phản ứng nên thiết kế lại
+
+Risk score không có giá trị nếu không dẫn tới action.
+
+## 7.1. Gợi ý ngưỡng hành động
+
+* 0–29: log only
+* 30–49: low alert
+* 50–69: medium alert + justification
+* 70–84: high alert + optional block
+* 85–100: block/quarantine + incident escalation
+
+## 7.2. Gắn thêm điều kiện theo maturity
+
+### EM = U
+
+* thiên về log và watchlist
+
+### EM = P
+
+* alert
+* yêu cầu justification
+* ghi thêm metadata
+* có thể chặn nếu data cực nhạy cảm
+
+### EM = A
+
+* block ngay
+* kill/quarantine process nếu phù hợp
+* sinh incident severity cao
+* notify admin/SOC/dashboard
+
+---
+
+# 8. Profiling và UEBA nên phát triển thế nào
+
+Slide nói rõ network/server profiling và anomaly detection dựa trên baseline. Bạn cần chuyển tư duy này thành **user/file/endpoint profiling** cho DLP. 
+
+## 8.1. Baseline cần lưu
+
+Mỗi user nên có baseline:
+
+* thư mục thường truy cập
+* loại file thường dùng
+* khung giờ làm việc
+* tần suất copy/print/upload
+* kênh trao đổi thường dùng
+
+Mỗi endpoint nên có baseline:
+
+* số lượng file nhạy cảm thường xử lý/ngày
+* loại process thường dùng
+* removable media usage
+* lưu lượng upload bình thường
+
+## 8.2. Ứng dụng baseline
+
+Baseline nên đi vào:
+
+* BehaviorAnomaly
+* MaturityScore
+* AttackChain correlation
+
+## 8.3. Dùng Isolation Forest như thế nào
+
+Đừng để ML đứng độc lập. Hãy cho nó làm:
+
+* một input cho BehaviorAnomaly
+* một input tăng MaturityScore
+* một điều kiện boost FinalRisk khi chuỗi hành vi lạ mạnh
+
+---
+
+# 9. Lộ trình phát triển thực tế theo từng phase
+
+## Phase 1 — Refactor logic scoring
+
+Mục tiêu: có bản chạy được và giải thích được.
+
+Làm:
+
+* tách Base / Maturity / Environmental
+* tạo Exfiltration Maturity U/P/A/X
+* sửa final risk formula
+* trả output JSON giàu thông tin
+* gắn ngưỡng action cơ bản
+
+Kết quả:
+
+* đủ mạnh để báo cáo và demo
+
+## Phase 2 — Correlation và attack chain
+
+Làm:
+
+* time window 5–10 phút
+* correlation giữa file/process/USB/network
+* chain bonus
+* reason codes chi tiết
+
+Kết quả:
+
+* giảm false positive đáng kể
+* score “thông minh” hơn
+
+## Phase 3 — Baseline và UEBA nâng cao
+
+Làm:
+
+* profile theo user và endpoint
+* train/update anomaly model
+* đưa baseline deviation vào maturity scoring
+* adaptive thresholds theo user role
+
+Kết quả:
+
+* hệ thống chuyển từ rule-heavy sang risk-aware, context-aware
+
+## Phase 4 — Dashboard và incident workflow
+
+Làm:
+
+* hiển thị phân rã điểm số
+* lịch sử event theo user
+* top risky channels
+* explainability panel
+* incident queue
+
+Kết quả:
+
+* rất mạnh khi demo và bảo vệ
+
+---
+
+# 10. Những gì nên viết trong báo cáo/luận văn
+
+## 10.1. Chương lý thuyết
+
+Bạn nên nói:
+
+* CVSS cung cấp tư duy chia nhóm metric
+* nhóm temporal/environmental là gợi ý rất tốt cho DLP
+* project không sao chép CVSS nguyên bản mà xây mô hình thích nghi cho exfiltration events
+
+## 10.2. Chương đề xuất mô hình
+
+Tên phần nên là:
+**CVSS-Inspired Risk Scoring Model for Endpoint DLP**
+
+Bên trong có:
+
+* Base Score
+* Exfiltration Maturity
+* Environmental Score
+* Attack Chain Bonus
+* Final Risk
+* Response Mapping
+
+## 10.3. Chương kiến trúc
+
+Nói rõ:
+
+* Agent chịu trách nhiệm thu thập nhẹ
+* Worker thực hiện phân tích nặng
+* scoring nằm tại Worker sau fast/deep scan
+* hash cache và queue giúp giảm chi phí và giữ tính ổn định
+
+Điều này bám rất sát kiến trúc hiện tại của bạn. 
+
+## 10.4. Chương đánh giá
+
+Nên so sánh:
+
+* scoring cũ
+* scoring mới
+
+Theo các case:
+
+* mở file nhạy cảm bình thường
+* copy USB
+* zip + USB
+* zip mật khẩu + upload external
+* anomaly cao nhưng content thấp
+* content cao nhưng context hợp lệ
+
+---
+
+# 11. Rủi ro triển khai và cách tránh
+
+## 11.1. False positive
+
+Cách tránh:
+
+* dùng confidence
+* dùng baseline
+* không cho Unknown thành worst case tuyệt đối
+* dùng chain thay vì chỉ nhìn single event
+
+## 11.2. Performance overhead
+
+Vì bạn có panic mode, lazy load OCR/ML, hash cache, queue SQLite rồi, nên nên tiếp tục giữ logic:
+
+* scoring nhẹ cho fast path
+* deep scoring chỉ khi event có tín hiệu đủ mạnh 
+
+## 11.3. Dữ liệu huấn luyện ít
+
+UEBA giai đoạn đầu chỉ nên là support signal, không nên quyết định block một mình.
+
+## 11.4. Thiếu telemetry
+
+Phải có mức X và reason code kiểu:
+
+* `telemetry_insufficient`
+* `network_visibility_disabled`
+
+---
+
+# 12. Kết luận định hướng phát triển
+
+Tóm gọn lại, hướng phát triển tốt nhất cho project của bạn là:
+
+**không biến DLP thành CVSS**, mà:
+
+* **mượn cấu trúc CVSS để tái thiết kế risk scoring cho DLP event**,
+* đặc biệt là lấy cảm hứng từ lớp **Temporal/Threat** để tạo ra **Exfiltration Maturity**,
+* sau đó hợp nhất với **Base Score**, **Environmental Score**, và **Attack Chain Bonus**,
+* cuối cùng map sang **response policy** rõ ràng.
+
+Nếu làm đúng hướng này, hệ thống của bạn sẽ tiến từ:
+
+* “phát hiện file nhạy cảm + cộng điểm”
+  thành:
+* “risk-based endpoint DLP với threat-aware scoring, context-aware prioritization, và explainable response”.
+
+Đây là hướng vừa hợp lý về kỹ thuật, vừa rất đúng tinh thần security engineering, lại bám được tài liệu lý thuyết mà thầy gợi ý.
+
+Ở bước tiếp theo, mình có thể viết tiếp cho bạn một trong hai phần:
+**(1)** bản **Risk Scoring Methodology** kiểu báo cáo/luận văn hoàn chỉnh,
+hoặc **(2)** bản **thiết kế kỹ thuật chi tiết theo module và pseudo-code** để bạn bám vào code triển khai.

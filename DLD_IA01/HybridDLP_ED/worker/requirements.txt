@@ -1,0 +1,47 @@
+# Detection Engine (L3) Requirements
+
+# Database
+# sqlite3 is built-in
+
+# File Processing
+yara-python>=4.3.0
+python-magic>=0.4.27  # File type detection
+python-docx>=1.1.2  # DOCX text extraction
+openpyxl>=3.1.2  # XLSX/CSV-like workbook extraction
+pypdf>=4.2.0  # Text-based PDF extraction
+pdf2image>=1.17.0  # Scanned PDF OCR helper; requires Poppler installed/on PATH
+
+# OCR
+pytesseract>=0.3.10
+Pillow>=10.0.0
+opencv-python>=4.8.0
+
+# Machine Learning
+scikit-learn>=1.3.0
+numpy>=1.24.0
+pandas>=2.0.0
+joblib>=1.3.0  # Model serialization
+
+# System Monitoring
+psutil>=5.9.0  # CPU/Memory monitoring
+
+# HTTP Client (gửi về server)
+requests>=2.31.0
+httpx>=0.27.0  # agent/agent_sender.py (importado pelo worker no Windows)
+
+# Logging
+loguru>=0.7.0  # Better logging
+
+# Modern endpoint popup UI (dark mode / Fluent-like warning window)
+customtkinter>=5.2.2
+
+# Configuration
+python-dotenv>=1.0.0  # Environment variables
+
+# Fuzzy hashing (thuật toán ssdeep/spamsum) — cache & alert dedup theo nội dung gần giống (SHA có thể khác).
+# Mặc định dùng ppdeep (pure Python, cài được trên Windows). Package `ssdeep` (libfuzzy) là tùy chọn nếu build được.
+ppdeep>=0.1.0
+
+# Note: Windows notification packages (win10toast, plyer, pywin32) are NOT included here
+# because worker runs in Docker (Linux). Notifications are handled by agent (Windows).
+# windows_notification.py has fallback to console logging if packages are not available.

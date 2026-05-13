@@ -1,0 +1,53 @@
+# Development docker-compose với hot-reload và debug
+version: "3.9"
+
+services:
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    container_name: hybrid-dlp-worker-dev
+    environment:
+      - LOG_LEVEL=DEBUG
+    volumes:
+      # Mount source code để hot-reload (development only)
+      - ./worker:/app/worker
+      - ./agent/runtime:/app/agent/runtime:ro
+      - worker-logs-dev:/app/worker/logs
+      - worker-models-dev:/app/worker/ml_models
+      - worker-database-dev:/app/worker/database
+    networks:
+      - hybrid-dlp-network
+    restart: unless-stopped
+    command: ["python", "-u", "worker.py"]  # -u for unbuffered output
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    container_name: hybrid-dlp-dashboard-dev
+    depends_on:
+      - worker
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./dashboard:/app/dashboard
+      - dashboard-logs-dev:/app/dashboard/logs
+      - worker-logs-dev:/app/worker/logs:ro
+    networks:
+      - hybrid-dlp-network
+    restart: unless-stopped
+
+volumes:
+  worker-logs-dev:
+  worker-models-dev:
+  worker-database-dev:
+  dashboard-logs-dev:
+
+networks:
+  hybrid-dlp-network:
+    driver: bridge

@@ -1,0 +1,10 @@
+Thông tin cá nhân
+CMND: 327796679
+CCCD: 648110801720
+Họ tên: Tran Thi B
+Ngày sinh: 15/05/1990
+Số điện thoại: 0915948426
+Email: tran.thi.b@example.com
+Địa chỉ: 123 Đường ABC, Quận 1, TP.HCM
+
+Thông tin bảo mật - Không được chia sẻ

@@ -1,0 +1,7 @@
+This activity diagram illustrates the car return workflow at the design level, using separate swimlanes for Staff and System to clarify responsibilities.
+
+The process starts when the staff accepts the returned vehicle and performs an inspection. The system records the inspection outcome. A decision node is used to determine whether the car has any issues such as damage or overuse.
+
+If problems are identified, the system calculates penalty fees and updates the booking with additional charges, while marking it as awaiting payment. Otherwise, the booking is finalized without extra cost.
+
+At the end of the process, the system updates the vehicle’s status to available, ensuring it can be rented again. The diagram highlights the control flow, decision-making, and coordination between human and system roles.

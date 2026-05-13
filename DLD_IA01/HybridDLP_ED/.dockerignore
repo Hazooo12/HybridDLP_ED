@@ -1,0 +1,93 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.env
+.venv
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Runtime data
+runtime/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# State files
+state/
+*.pid
+*.flag
+*.json
+!package.json
+!package-lock.json
+
+# Test files
+test/
+tests/
+*.test.py
+*_test.py
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Agent runtime (will be mounted as volume)
+agent/runtime/events.db
+agent/runtime/events.jsonl
+agent/runtime/logs/
+agent/runtime/state/
+
+# Worker runtime (will be mounted as volume)
+worker/logs/
+worker/ml_models/
+worker/database/
+worker/dataset/
+
+# Dashboard runtime
+dashboard/logs/

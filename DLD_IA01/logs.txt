@@ -1,0 +1,211 @@
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:34.598 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:34.606 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:34.607 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | 2026-03-06 23:49:36.587 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:36.606 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:36.615 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:36.616 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | 2026-03-06 23:49:38.592 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:38.608 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:38.616 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:38.617 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | 2026-03-06 23:49:40.583 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:40.601 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:40.609 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:40.609 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | 2026-03-06 23:49:42.575 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:42.591 Please replace `use_container_width` with `width`.
+
+
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:42.599 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:42.600 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | 2026-03-06 23:49:44.580 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:44.595 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:44.602 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:44.603 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | 2026-03-06 23:49:46.585 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:46.602 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:46.609 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:46.610 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | 2026-03-06 23:49:48.590 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:48.609 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:48.616 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:48.617 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')
+hybrid-dlp-dashboard  | 2026-03-06 23:49:50.588 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:50.605 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:50.614 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'` or specify an integer width.
+hybrid-dlp-dashboard  | 2026-03-06 23:49:50.616 Please replace `use_container_width` with `width`.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | `use_container_width` will be removed after 2025-12-31.
+hybrid-dlp-dashboard  |
+hybrid-dlp-dashboard  | For `use_container_width=True`, use `width='stretch'`. For `use_container_width=False`, use `width='content'`.
+hybrid-dlp-dashboard  | /app/dashB.py:66: FutureWarning: In a future version of pandas, parsing datetimes with mixed time zones will raise an error unless `utc=True`. Please specify `utc=True` to opt in to the new behaviour and silence this warning. To create a `Series` with mixed offsets and `object` dtype, please use `apply` and `datetime.datetime.strptime`
+hybrid-dlp-dashboard  |   df["timestamp"] = pd.to_datetime(df["timestamp"], format='ISO8601', errors='coerce')

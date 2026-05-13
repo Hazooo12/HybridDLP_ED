@@ -1,0 +1,12 @@
+DANH SÁCH NHÂN VIÊN
+Phòng ban: Nhân sự
+
+STT | Họ tên | CMND | Email | Lương
+1 | Nguyen Van A | 549085735 | nguyen.van.a@example.com | 15,000,000 VND
+2 | Tran Thi B | 685743834 | tran.thi.b@example.com | 12,000,000 VND
+3 | Le Van C | 324179155 | le.van.c@example.com | 18,000,000 VND
+4 | Pham Thi D | 441748379 | pham.thi.d@example.com | 20,000,000 VND
+
+Tổng lương: 65,000,000 VND
+
+Thông tin nhân sự - Bảo mật
